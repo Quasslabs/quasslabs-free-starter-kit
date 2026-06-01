@@ -22,10 +22,10 @@ Ask the user which they use if it's unclear. Prefer **project-local** install so
 
 ## 2. Inventory + propose (read-only first)
 
-1. List `skills/` in this repo (19 skills — see `README.md` for the map).
+1. List `skills/` in this repo (20 skills — see `README.md` for the map).
 2. Look at the user's project: does it already have a `CLAUDE.md`? a `.claude/skills/` folder? any same-named skills?
 3. Propose a short integration plan and **wait for confirmation**:
-   - which skills to install (default: all 19; or just the foundation),
+   - which skills to install (default: all 20; or just the foundation),
    - target location,
    - any name collisions (never clobber — skip or rename, ask the user).
 

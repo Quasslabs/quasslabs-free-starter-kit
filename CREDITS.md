@@ -33,7 +33,9 @@ If you're building your own skill library, treat this page + [`OTHER-REPOS.md`](
 ## Original (QuassLabs)
 
 No external upstream — built here, licensed MIT (see `LICENSE.md`):
-`lifecycle/chat-primer` · `lifecycle/project-env-setup` · `lifecycle/reflect` · `repo-doc-builder` · `task-router` · `ollama-task-router` · `notify` · `meta/skill-linter`
+`lifecycle/chat-primer` · `lifecycle/project-env-setup` · `lifecycle/reflect` · `repo-doc-builder` · `task-router` · `ollama-task-router` · `notify` · `meta/skill-linter` · `integrations/freellmapi`
+
+**freellmapi note:** This skill wraps [tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) (MIT). The wrapper skill is original QuassLabs work; freellmapi itself is MIT © tashfeenahmed. Install freellmapi separately — it is not bundled in this kit.
 
 ---
 

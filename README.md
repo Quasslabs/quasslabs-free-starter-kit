@@ -1,6 +1,6 @@
 # Agent Skills — Free Starter Kit
 
-A curated, free set of **agent skills** for Claude Code, Cursor, and Codex — the foundation layer from a 400+ skill private hub, given away so you can see how good a structured skill system feels.
+A curated, free set of **agent skills** for Claude Code, Cursor, and Codex — the foundation layer from a 500+ skill private hub, given away so you can see how good a structured skill system feels.
 
 Built by [QuassLabs](https://quasslabs.com) (Taylor Quass). If these help, the deeper specialized packs are linked at the bottom.
 
@@ -12,11 +12,17 @@ Built by [QuassLabs](https://quasslabs.com) (Taylor Quass). If these help, the d
 
 A skill is a small markdown file (`SKILL.md`) that tells an AI agent *how* to do one job well — the steps, the gotchas, the handoffs to other skills. Drop them in your agent's skills folder and it stops guessing.
 
+Each skill in this kit ships with 4 files:
+- `SKILL.md` — what the skill does and how to invoke it
+- `SETUP.md` — deps, credentials, how to run, how to verify it works
+- `REPORT.md` — measured value, flow context, skill interactions
+- `LESSONS.md` — production lessons and corrections
+
 > The core idea: **don't hand the AI a blank room and a box of crayons — hand it a coloring book.** A structured environment (clear context, conventions, and a defined task) gets dramatically better output than "go build me a thing." See [`PHILOSOPHY.md`](PHILOSOPHY.md).
 
 ---
 
-## What's in here (19 skills)
+## What's in here (20 skills)
 
 ### Start here — take weight off day one
 | Skill | What it does |
@@ -56,6 +62,7 @@ A skill is a small markdown file (`SKILL.md`) that tells an AI agent *how* to do
 | `developer/improve-codebase-architecture` | Surface architectural friction + a deletion-test heuristic. |
 | `developer/zoom-out` | Escape-hatch when you're stuck inside one file — produces a module map. |
 | `humanizer` | Strip the AI tells out of generated writing. |
+| `integrations/freellmapi` | Self-hosted proxy that routes eligible non-sensitive tasks to ~14 free-tier providers (Gemini, Groq, Cerebras…) for $0. |
 
 ---
 
