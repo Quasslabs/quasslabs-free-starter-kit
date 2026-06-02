@@ -12,8 +12,9 @@ Built by [QuassLabs](https://quasslabs.com) (Taylor Quass). If these help, the d
 
 A skill is a small markdown file (`SKILL.md`) that tells an AI agent *how* to do one job well — the steps, the gotchas, the handoffs to other skills. Drop them in your agent's skills folder and it stops guessing.
 
-Each skill in this kit ships with 4 files:
+Each skill in this kit ships with 5 files:
 - `SKILL.md` — what the skill does and how to invoke it
+- `FUNCTIONS.md` — pure functions (deterministic/Lambda-ready), AI-assisted steps, external services
 - `SETUP.md` — deps, credentials, how to run, how to verify it works
 - `REPORT.md` — measured value, flow context, skill interactions
 - `LESSONS.md` — production lessons and corrections
