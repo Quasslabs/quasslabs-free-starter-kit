@@ -11,6 +11,8 @@ description: >
 **Ug-ug mode:** lite  
 **Model:** haiku — pure file I/O and markdown templating; no reasoning or generation required
 **Tool compatibility:** Codex · Claude Code · Cursor · Cowork
+**Status:** beta  <!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+**Parallelizable:** yes — no shared mutable state detected (auto-inferred; verify)
 
 ---
 
@@ -271,3 +273,12 @@ Structure:
 | `check_trigger_heuristics` | Inline — evaluate context size, tool call count, task counts to auto-invoke | yes | ✅ |
 
 None. This skill is conversation-context-dependent and local-filesystem-bound — not a Lambda candidate. `gather_context` requires reading live conversation state and local git status; `write_handover_md` writes to a project-root path on the local machine. `generate_session_opener` and `emit_chat_paste_block` are stateless text operations that could be extracted to Lambda but provide no value outside the session context where they run.
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Bash | `git *` | Referenced in skill body |
+| Filesystem | `<workspace>/...` | Referenced in skill body |

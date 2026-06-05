@@ -56,7 +56,7 @@ python draft_skill.py --name <slug> --desc "<what it should do>" --bot reporter
 ```
 
 Takes a source doc (repo README, parsed PDF, markdown) or a `--desc`, drafts a SKILL.md against
-the house template via `qwen2.5-coder:14b` (Mac mini), and writes a `wip/<slug>/` triad.
+the house template via `qwen2.5-coder:14b` (Mac mini), and writes a `wip/<slug>/` penta (SKILL + FUNCTIONS + LESSONS + REPORT + SETUP — see Phase Final gate).
 
 **Draft gate (anti-sprawl — do not bypass):** output is ALWAYS `Status: draft`, never registered
 and never auto-promoted. A mediocre auto-skill is worse than none. Required human path before it
@@ -336,6 +336,90 @@ After writing the SKILL.md, optionally run a grading pass:
 
 The installed Cowork `skill-creator` skill can also run the draft→test→evaluate→improve loop with eval viewer and blind comparison. Use it for fine-tuning after the structure is set.
 
+### SkillOpt bounded-edit refinement pass (optional, for targeted improvement)
+
+Source: microsoft/SkillOpt — text-space optimizer for skill documents. Ranked bounded edits outperform open-ended rewrites by limiting blast radius and making changes reviewable.
+
+**When to use:**
+- Skill has a specific weakness (e.g. missing guidance for an edge case, a step that generates poor outputs)
+- You want targeted improvement without restructuring the whole document
+- After production use surfaces recurring failures
+
+**When to use full-rewrite instead:** structural overhaul, major scope change, or the document has accumulated enough cruft that patch-based edits would conflict with each other.
+
+#### Edit format
+
+Each proposed edit is a JSON object:
+
+```json
+{
+  "op": "append" | "insert_after" | "replace" | "delete",
+  "target": "<exact anchor text from the document — the section header or sentence to operate on>",
+  "content": "<new text to insert or replace with>"
+}
+```
+
+`"append"` adds to the end of the document. `"insert_after"` places content immediately after the `target` string. `"replace"` substitutes the `target` string entirely. `"delete"` removes `target` with no replacement (`"content"` omitted).
+
+#### Ranking criteria (apply before committing any edit)
+
+Rank candidate edits in this priority order before choosing which to apply:
+
+1. **Systematic impact** — edits that address widespread, recurring failure patterns across many tasks rank highest
+2. **Complementarity** — edits that fill gaps not covered elsewhere in the document (not duplicates of existing guidance)
+3. **Generality** — edits phrased as general principles rank higher than those tied to a single specific case
+4. **Actionability** — edits with clear, concrete guidance rank higher than vague advice
+
+When multiple edits conflict, apply only the highest-ranked one; re-evaluate the rest after the document is updated.
+
+#### Protecting stable sections
+
+Wrap any section that should never be mutated by automated or LLM-driven edits:
+
+```markdown
+<!-- SLOW_UPDATE_START -->
+[stable content — core contracts, schemas, approved patterns]
+<!-- SLOW_UPDATE_END -->
+```
+
+Use this for: Lambda candidate specs, schema definitions, approved model routing tables, security constraints. Do NOT use it to freeze guidance that genuinely needs to evolve.
+
+#### LLM prompts (for automated refinement via Ollama/Sonnet)
+
+**Ranking prompt** — send with the current SKILL.md + a list of proposed edits:
+```
+You are an expert skill-optimization optimizer. You receive a skill document and a pool
+of proposed edits. Your job is to RANK the edits by importance and select the top ones.
+
+Ranking criteria (in order of priority):
+1. Systematic impact: edits that address widespread, recurring failure patterns
+   across many tasks should rank highest.
+2. Complementarity: edits that fill gaps in the current skill (not duplicate existing content).
+3. Generality: edits phrased as general principles rank higher than those tied to specific cases.
+4. Actionability: edits with clear, concrete guidance rank higher than vague advice.
+
+Respond ONLY with a valid JSON object:
+{"reasoning": "<brief justification>", "selected_indices": [<0-based indices in priority order>]}
+```
+
+**Full-rewrite prompt** — use when patch-based edits would conflict or the structure needs overhauling:
+```
+You are an expert skill-document rewriter for an AI agent training system.
+Hard requirements:
+1. Produce a complete standalone skill document, not a patch.
+2. Keep effective existing guidance unless a suggestion clearly says to remove or merge it.
+3. Prefer consolidation and clarity over making the document longer.
+4. Do not hardcode benchmark-specific answers, entity names, file paths, or gold values.
+5. Preserve the skill's scope.
+6. Do not modify content inside <!-- SLOW_UPDATE_START --> ... <!-- SLOW_UPDATE_END -->.
+7. Rewritten skill should be concise, internally consistent, better organized.
+
+Respond ONLY with a valid JSON object:
+{"reasoning": "...", "change_summary": ["<change 1>", ...], "new_skill": "<full rewritten skill document>"}
+```
+
+**Future:** a full automated optimization loop (score → generate edits → rank → apply → re-score → repeat) is tracked as a future `skill-optimizer` skill once a scoring harness exists. See `microsoft/SkillOpt` in `<notes>/...` for the reference implementation.
+
 ---
 
 ## Phase 8 — Add to CLAUDE.md inventory
@@ -394,3 +478,57 @@ Full skill-builder pipeline: API Gateway POST `{ task_description }` → Phase 0
 | Generate IAM roles if skill has Lambda steps | `skills/iam-advisor/SKILL.md` |
 | Deploy the skill's Lambda candidates | `skills/deployer/ballparker-aws/SKILL.md` |
 | Run draft→test→evaluate→improve loop | Cowork skill-creator (installed) |
+
+---
+
+## Phase Final — Penta completion gate (mandatory before done)
+
+Do not mark the skill complete until all required files exist in the skill folder:
+
+```
+□ SKILL.md       — instructions, steps, handoffs, Lambda candidates, Permissions section
+□ FUNCTIONS.md   — pure functions table + AI-assisted steps + external services
+□ LESSONS.md     — design decisions + anti-patterns + dated initial build entry
+□ REPORT.md      — output schema: what the skill produces, field definitions, example output
+□ SETUP.md       — one-time setup: dependencies, credentials, config files, verify step
+□ examples/      — REQUIRED if skill touches .claude/* files, hooks, or generates structured output
+□ schemas/       — REQUIRED if skill has non-trivial JSON input or output
+```
+
+**REPORT.md format:**
+```markdown
+# REPORT: {skill-name}
+## Output schema
+| Field | Type | Description |
+## Example output
+{json or markdown example}
+## Downstream consumers
+{which skills or scripts read this output}
+```
+
+**SETUP.md format:**
+```markdown
+# SETUP: {skill-name}
+## Prerequisites
+## Install
+## Config
+## Credentials (vault entries)
+## Verify
+Run: {command} → Expected: {output}
+```
+
+---
+
+## llm-selector call (mandatory before emitting SKILL.md)
+
+Before writing the `**Model:**` header, call `llm-selector` with the skill's task type and frequency:
+
+```
+Task type:  [classify | generate | extract | route | orchestrate | ...]
+Frequency:  [per-session | per-PR | hourly | daily | on-demand]
+Sensitivity: [low | medium | high]  ← high = needs cloud
+```
+
+Use the result to fill in `**Model:**`. Never default to sonnet without running this check.
+
+Skill: `skills/llm-selector/SKILL.md`

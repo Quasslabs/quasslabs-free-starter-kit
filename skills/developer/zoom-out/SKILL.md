@@ -11,6 +11,8 @@ disable-model-invocation: true
 **Ug-ug mode:** lite
 **Model:** haiku — single-prompt summary, no reasoning chain
 **Tool compatibility:** Claude Code · Cursor · Codex
+**Status:** beta  <!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+**Parallelizable:** yes — no shared mutable state detected (auto-inferred; verify)
 
 **Origin:** Imported from [mattpocock/skills](https://github.com/mattpocock/skills) (engineering/zoom-out), MIT licensed. Source preserved at `_source_SKILL.md`.
 
@@ -45,3 +47,11 @@ None — this is a single-prompt direction skill, no functions to extract.
 # zoom-out (source body)
 
 I don't know this area of code well. Go up a layer of abstraction. Give me a map of all the relevant modules and callers, using the project's domain glossary vocabulary.
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Filesystem | `<workspace>/...` | Referenced in skill body |

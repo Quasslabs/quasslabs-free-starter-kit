@@ -42,6 +42,18 @@ Source: https://github.com/whiterabb17/mindpalace
 
 ---
 
+## Companion layer — claude-subconscious
+
+Always activate alongside memory-ladder. It runs passively in the background; memory-ladder handles intentional writes.
+
+**Session start:** load both `MEMORY.md` and `subconscious.md` (if exists) for the project slug. Inject subconscious observations as low-weight context.
+
+**Session end:** before writing the Layer 6/7 handoff, call `drain_subconscious()` — high-signal observations from `subconscious.md` promote into formal `MEMORY.md` entries. Medium-signal stays in `subconscious.md` for next session.
+
+Skill: `skills/agent-llm/claude-subconscious/SKILL.md`
+
+---
+
 ## When to invoke
 
 - "Context is getting long"
@@ -208,6 +220,7 @@ START HERE:
 - **→ session-handover** when context limit is reached and state must be persisted
 - **→ agent-memory** for short-term in-session memory patterns
 - **→ operator** if memory retrieval returns stale or contradictory state
+- **→ claude-subconscious** (`skills/agent-llm/claude-subconscious/SKILL.md`) — passive companion; activate at session start, drain at session end alongside Layer 6 promotion
 - **→ stop-hook** (`skills/memory/stop-hook/SKILL.md`) — auto-flushes memory on session end; stamps MEMORY.md timestamp + calls compress_for_ollama.py; fires automatically via Claude Code `Stop` hook
 - **→ obsidian-vault** (`skills/memory/obsidian-vault/SKILL.md`) — browse/edit raw memory files in Obsidian graph view; add_frontmatter.py backfills YAML tags + related links across all 47 topic files
 

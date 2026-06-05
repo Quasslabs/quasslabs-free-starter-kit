@@ -1,5 +1,7 @@
 ---
 name: humanizer
+status: beta  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
+parallelizable: yes  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
 version: 2.5.1
 description: |
   Remove signs of AI-generated writing from text. Use when editing or reviewing
@@ -605,3 +607,12 @@ Provide:
 This skill is based on [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup. The patterns documented there come from observations of thousands of instances of AI-generated text on Wikipedia.
 
 Key insight from Wikipedia: "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Filesystem | `<workspace>/...` | Referenced in skill body |
+| Network | `https://en.wikipedia.org/*` | Referenced in skill body |

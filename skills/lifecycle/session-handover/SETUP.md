@@ -5,7 +5,7 @@
 **Last verified:** 2026-05-31
 
 No setup required — invoke directly. session-handover writes `HANDOVER.md` + a chat paste
-block; uses only file writes and in-model summarization.
+block; it uses only file writes and in-model summarization.
 
 ## Dependencies
 
@@ -24,5 +24,5 @@ Invoke at ~50% context usage or before session end. Outputs `HANDOVER.md` in the
 
 ## Verify it works
 
-1. Invoke in a project directory → HANDOVER.md created/updated.
+1. Invoke in a project directory → `HANDOVER.md` created/updated.
 2. File contains: completed[], open_items[], decisions[], files_modified[], next_action.

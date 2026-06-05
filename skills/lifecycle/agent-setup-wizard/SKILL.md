@@ -115,21 +115,35 @@ Create any missing `_context/` stubs now (empty files, headers only). Write `_re
 
 ## Phase 2 — Load Core Skill Kit
 
-Load `CORE-SKILL-KIT.json` from `skills/`. Display the 24 foundational skills to the user as a pre-selected checklist:
+**Resolve the manifest path** (first hit wins — this lets the wizard run inside the full hub OR a distributed kit clone without code changes):
+1. `CORE-SKILL-KIT.json` at the repo / kit root (current working tree)
+2. `CORE-SKILL-KIT.json` alongside a sibling `skills/` tree
+3. Fallback: `skills/CORE-SKILL-KIT.json` (only present when running inside the full hub)
+
+If none resolve, emit a clear message ("CORE-SKILL-KIT.json not found — running with no pre-selected core kit") and continue to Phase 3 rather than failing.
+
+**Render the checklist from the loaded manifest — do NOT hardcode skill names.** Each skill entry carries an optional `available` flag:
+- `available !== false` → **Included** in this distribution. Pre-select it (checkbox on).
+- `available === false` → **Available in the full hub →** show it (read-only, not selectable) with its `upgrade` pointer. This advertises breadth without promising skills the current distribution doesn't ship.
+
+For a namespace entry (e.g. `integrations`), use `available_subskills[]` to split which sub-skills are Included vs hub-only.
+
+Render order: group by category, Included first, then an "Available in the full hub" section. Example shape (actual rows come from the manifest):
 
 ```
-✅ integrations (10 sub-skills)
-✅ llm-selector, gstack, skill-recommender, task-router, ollama-task-router
-✅ memory-recommender, memory-advisor, memory-ladder
-✅ ug-ug
-✅ skill-builder, skill-linter, operator, reflect, session-handover, claude-md-sync, notify, agent-setup-wizard, project-env-setup, local-runner, engagement-config-setup, orchestrator, skillmaster
+INCLUDED (pre-selected)
+  ✅ <skill> — <description>
+  ...
+AVAILABLE IN THE FULL HUB →  (upgrade to unlock)
+  ⟡ <skill> — <description>   [full hub / paid pack]
+  ...
 ```
 
-**Prompt:** "These 24 core skills are pre-selected for every new project. Any you want to exclude?" (User can press Enter to accept all or list exclusions.)
+**Prompt:** "The Included skills above are pre-selected for this project. Any you want to exclude? (Enter to accept all, or list exclusions.)" Only Included skills are selectable.
 
-Store the selected core skills list for Phase 4 (ug-ug assignment).
+Store the selected (Included) core skills list for Phase 4 (ug-ug assignment).
 
-**Rule:** Never exclude more than 50% of core skills — if a user excludes 12+, flag this as a red gate requiring confirmation (they may be conflicting with an existing project setup).
+**Rule:** Never exclude more than 50% of the *Included* core skills — if a user excludes that many, flag a red gate requiring confirmation (they may be conflicting with an existing project setup).
 
 ---
 
@@ -458,7 +472,7 @@ Full config: `_context/memory-config.yaml` (load on demand)
 
 ## Core Skills
 
-All projects include the 24 core skills. See `skills/CORE-SKILL-KIT.json`.
+All projects include the Included core skills declared in the resolved `CORE-SKILL-KIT.json` manifest (see Phase 2 for path resolution). Full hub manifest: `skills/CORE-SKILL-KIT.json`.
 
 Key skills for this project:
 [List from Phase 3 skill discovery — tech-specific skills only; core skills are always present]
@@ -470,6 +484,14 @@ Key skills for this project:
 [GStack assignments from Phase 6 — haiku/sonnet/opus per step]
 
 See `skills/gstack/SKILL.md` for routing rules.
+
+---
+
+## Active skills
+
+<!-- skill-audit-candidates -->
+[Populated by Phase 9.6 — one line per skill: `- skill-name — when it applies`]
+<!-- /skill-audit-candidates -->
 
 ---
 
@@ -530,6 +552,45 @@ Required entries: [list from above]
 
 Always: check vault → env → .env → THEN ask user. Never ask for credentials directly.
 ```
+
+---
+
+## Phase 9.6 — Skill gate injection
+
+Populate the `<!-- skill-audit-candidates -->` block in the generated CLAUDE.md. This is what `session-skill-auditor` reads every 8 prompts.
+
+**Step 1 — Select mandatory gates** using the project type from Phase 1:
+
+| Project type | Mandatory gate skills |
+|---|---|
+| Web app / SaaS | `developer/careful-guard` · `qa-auditor/dev-gate` · `code-reviewer` |
+| Mobile (RN / Android) | `developer/careful-guard` · `android-build-deploy` · `qa-auditor/dev-gate` |
+| AWS Lambda / backend API | `developer/careful-guard` · `qa-auditor/dev-gate` · `deployer/[relevant]` |
+| Infrastructure (Terraform) | `terraform-safe` · `deployer/terraform-validator` · `qa-auditor/security-gate` |
+| Data pipeline / ETL | `developer/careful-guard` · `qa-auditor/dev-gate` · `qa-auditor/supply-chain-scanner` |
+| Estimation / scoping | `scope-master/engagement-bootstrap` · `storyboard-builder` · `coverage-checker` |
+| Any project with PRs | `ollama-pr-gemini-watcher` · `ollama-pr-replier` · `code-reviewer` |
+
+**Step 2 — Add tech-specific skills** from Phase 3 discovery that involve non-trivial judgment and would benefit from a periodic reminder. Exclude: core utilities (notify, memory-ladder, ug-ug), skills that auto-trigger via hooks.
+
+**Step 3 — Always include** `session-skill-auditor` itself in the list (self-reinforcing).
+
+**Step 4 — Write the block** into the CLAUDE.md `## Active skills` section:
+
+```markdown
+## Active skills
+
+<!-- skill-audit-candidates -->
+- developer/careful-guard — read before editing existing source files
+- qa-auditor/dev-gate — run before handing off a feature for QA
+- code-reviewer — run before opening a PR
+- ollama-pr-gemini-watcher — auto-triggers on gh pr create via hook
+- deployer/ecr-github-actions-deploy — read before any EC2 deploy
+- session-skill-auditor — periodic check that all relevant skills are active
+<!-- /skill-audit-candidates -->
+```
+
+**Rule:** Keep the block to 4–8 entries. More than 8 means the project scope is too broad — split it.
 
 ---
 
@@ -648,7 +709,7 @@ Add to project `.env` template (session-only, never persist to disk):
 | Type | Pattern | Why |
 |---|---|---|
 | Filesystem | `{project_root}\**` (write) | Scaffold CLAUDE.md, AGENTS.md, _context/ stubs, .mcp.json, test-config.json |
-| Filesystem | `skills/CORE-SKILL-KIT.json` (read) | Load the 24-skill core kit manifest |
+| Filesystem | `CORE-SKILL-KIT.json` (read; resolved per Phase 2 — repo root, sibling `skills/`, or hub fallback) | Load the core kit manifest |
 | MCP | `mcp__keepassxc-secrets__*` | Phase 9.5 vault pre-flight coverage check |
 | Network | `http://localhost:11434` | Phase 5.5 Ollama model probe for test-loop config |
 

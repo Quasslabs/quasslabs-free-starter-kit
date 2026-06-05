@@ -93,7 +93,7 @@ REQUIRED_HEADERS = [
     ("**Bot:**",          r"^\*\*Bot:\*\*\s+\S+"),
     ("**Role:**",         r"^\*\*Role:\*\*\s+\S+"),
     ("**Ug-ug mode:**", r"^\*\*Ug-ug mode:\*\*\s+\S+"),
-    ("**Tool compatibility:**", r"^\*\*Tool compatibility:\*\*\s+\S+"), · Cowork
+    ("**Tool compatibility:**", r"^\*\*Tool compatibility:\*\*\s+\S+"),
 ]
 
 REQUIRED_SECTIONS = ["## When to invoke", "## Handoffs"]

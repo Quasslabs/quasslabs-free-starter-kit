@@ -5,7 +5,7 @@
 **Last verified:** 2026-05-31
 
 No setup required — invoke directly. memory-ladder is a 7-layer file-based memory backend;
-it reads/writes Markdown files in the project's `_context/` and `memory/` directories.
+it reads/writes Markdown files in the project's `_context/` + `memory/` directories.
 
 ## Dependencies
 
@@ -20,12 +20,10 @@ None.
 ```
 Invoke skill: skills/memory/memory-ladder/SKILL.md
 ```
-Can be invoked directly, or via `memory/recommender` / `memory/advisor` if you have
-those skills installed. (**`memory/recommender` and `memory/advisor` are not included
-in this free kit** — memory-ladder works standalone; the recommender/advisor are part of
-the extended memory subsystem in the full hub.)
+Typically invoked by `memory/recommender` or `memory/advisor` after they select
+memory-ladder as the backend for a project.
 
 ## Verify it works
 
 1. Invoke with `mode: load, slug: <project>` → returns memory layers as structured JSON.
-2. Confirm `_context/` directory exists in the target project after invocation.
+2. Confirm `_context/` directory exists in the target project.

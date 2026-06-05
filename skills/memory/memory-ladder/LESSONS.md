@@ -8,6 +8,18 @@
 
 ---
 
+## Repo additions — 2026-05-30 (star triage)
+
+### thedotmack/claude-mem — cross-session memory compression pattern
+Source: `<notes>/...` → "Star triage — 2026-05-30".
+- **claude-mem (76k★ Apache-2.0):** captures everything the agent does during a session → AI-compresses it → injects compressed memory at the start of the next session. Stop hook triggers compression; UserPromptSubmit hook injects.
+- **Alignment with memory-ladder:** claude-mem is essentially memory-ladder Layer 4 (cross-session compressed summaries) with automatic triggering via hooks. Our Layer 4 currently requires manual `session-handover` invocation.
+- **Pattern to adopt:** add a Stop hook in `settings.json` that calls `memory-ladder compact <project-slug>` automatically — same effect as claude-mem's compression step. Eliminates the "remember to run session-handover" friction.
+- **Compression strategy:** claude-mem uses Claude itself to compress (expensive per session). Our `compress-session` skill uses phi4-mini (local, $0). Prefer local compression for daily sessions; Claude-quality compression for major milestone handoffs only.
+- **Injection strategy:** claude-mem injects at UserPromptSubmit. Our chat-primer already does this (Phase 1.5a reads memory). No change needed — confirm chat-primer's injection includes the compressed layer.
+
+---
+
 ## 2026-05-14 — Adopt the 3-file checkpoint pattern (from OthmanAdi/planning-with-files v2.38.0)
 
 `planning-with-files` (21k ⭐, MIT) implements Manus-style persistent markdown planning with a strict 3-file convention. We did NOT import the whole skill — `memory-ladder` already covers persistent agent memory. We are adopting the **file structure + hooks pattern** below to upgrade memory-ladder's mid-task state management.
@@ -64,3 +76,29 @@ Source: `<notes>/...` → "2026-05-20 high priority pulls".
 
 - **`rowboatlabs/rowboat` (— Apache-2.0)** — multi-agent coworker with built-in memory. **Mine for memory architecture patterns** before the next memory-ladder pass (the planned v3 rewrite with 3-file convention + hooks frontmatter). Specific things to extract: cross-agent shared-memory schema, write-conflict resolution model, and how rowboat keeps memory bounded as the conversation grows. Read order: their memory-architecture docs first, then the agent-orchestration layer.
 - **`NirDiamant/Agent_Memory_Techniques` (— MIT)** — curated memory architecture techniques reference. **Mine before the next memory-ladder improvement pass.** Treat as a reading list, not vendor code. Cross-reference each technique against our 7-layer model and note which we already do, which we should adopt, and which don't apply to a single-user solo-dev workspace.
+
+## 2026-05-30 — Mandatory 3-file persistence discipline (pattern-after a5c-ai/babysitter session-memory)
+
+`session-memory` is a more opinionated, narrower take than our layered model: a fixed **3-file** memory surface in `.claude/cc10x/` with an "Iron Law" that EVERY workflow loads at start and updates at end. Worth adopting the *discipline*, not replacing our layers.
+
+### The exact 3-file structure
+
+| File | Role | Maps to memory-ladder |
+|---|---|---|
+| `activeContext.md` | Current focus · decisions · learnings · next steps · blockers | Layer 1–2 (working state) + handover seed |
+| `patterns.md` | Project conventions · architecture decisions · common gotchas · reusable solutions | Layer 3 (project LESSONS) — the durable "how we do things here" |
+| `progress.md` | Task completion tracking **with verification evidence** | Layer 2 (chronological session log) |
+
+This is the same shape as the `planning-with-files` 3-file convention already noted above (`task_plan`/`findings`/`progress`), but session-memory's framing of the *middle* file as **patterns** (durable conventions) rather than **findings** (transient research) is the useful distinction — it separates "what I'm learning right now" from "what is permanently true about this project."
+
+### The "mandatory on every session" discipline (the real lesson)
+
+- **Iron Law:** LOAD at START (and before key decisions) · UPDATE at END (and after any learning/decision). No workflow is exempt. This is stronger than memory-ladder's current "update as needed" guidance and complements the 2-Action Rule already queued for v3.
+- **Stable edit anchors:** pre-declare safe section headers (`## Recent Changes`, `## Learnings`, `## Common Gotchas`, `## Completed`, `## Verification`) so `Edit` operations have deterministic `old_string` targets — avoids the "anchor drifted, edit failed" problem on long-lived memory files.
+- **Read-Edit-Verify loop:** Read file → confirm anchor exists → Edit with exact `old_string` → Read back to confirm. Worth encoding in memory-ladder's `save()` backend contract.
+- **Permission-free by design:** `Write()` for NEW files, `Edit()` for EXISTING; never `Write()`-overwrite an existing memory file; never compound shell commands (`mkdir && cat`). Keeps memory updates from triggering permission prompts mid-session — directly relevant to our chat-primer auto-injection.
+- **Verification evidence in progress.md** is the strongest borrow: don't just log "did X," log the proof X worked. Pairs with our reflect skill.
+- Source: https://github.com/a5c-ai/babysitter (session-memory skill)
+
+## 2026-05-30 - pattern-after: a5c-ai/babysitter session-memory (511 stars, live source)
+- Mandatory 3-file memory structure per session (context / decisions / next-actions) - a hard convention, not optional. Reinforces our existing ladder: never end a session without writing all three. The discipline (always-write, never-skip) is the borrowed pattern.

@@ -239,3 +239,52 @@ All steps are stateless and deterministic from fixed rule tables — strong Lamb
     "estimated_cost": "~$0.05 cloud + $0 local"
   }
 }
+
+---
+
+## Data collection (art-train)
+
+```python
+import sys; sys.path.insert(0, r"<workspace>/...")
+from art_train_collector import log_pair, update_outcome
+
+event_id = log_pair("task-router/classify", task_description, json.dumps({"model": model, "gate_type": gate_type}), model="phi4-mini")
+
+# If downstream task succeeded without the gate firing:
+update_outcome("task-router/classify", event_id, "ok")
+
+# If the gate fired correctly (blocker was real):
+update_outcome("task-router/classify", event_id, "confirmed")
+```
+
+**Training target:** Feeds `task-router-local` — reduces false red gates over time.
+
+---
+
+## Step 0 — ollama-task-router delegation (mandatory before plan execution)
+
+**Before executing any multi-step plan or skill sequence**, call `ollama-task-router` with the full task step list. Display the routing table to the user before starting work.
+
+```
+Step 0 output (always show this):
+
+ROUTING TABLE — [task name]
+Step                          Route         Model              Est. cost
+─────────────────────────────────────────────────────────────────────────
+classify log severity         LOCAL         phi4-mini          $0
+draft PR reply                LOCAL         qwen2.5-coder:7b   $0
+evaluate architectural risk   CLOUD         Sonnet             ~$0.05
+generate storyboard stories   MAC-MINI      qwen2.5:32b        $0
+
+Total estimated cost: ~$0.05 (vs ~$0.35 if all-cloud)
+Savings: ~86%
+```
+
+Route labels:
+- `LOCAL` — Windows Ollama (localhost:11434)
+- `MAC-MINI` — Mac mini Ollama (<lan-host>:11434)  
+- `CLOUD` — Sonnet/Opus/Haiku via Anthropic API
+
+**Rule:** never default all steps to CLOUD without running this check first. Any step that is classify/route/format/extract can go LOCAL. Only genuine judgment + generation steps need CLOUD.
+
+Skill: `skills/ollama-task-router/SKILL.md`

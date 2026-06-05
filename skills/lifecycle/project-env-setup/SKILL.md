@@ -240,8 +240,7 @@ memory-ladder:
 
 # Memory recommender TODO
 # Instructions:
-#   1. Run: python skills/memory
-ecommender\memory_recommender.py --project [slug]
+#   1. Run: python skills/memory/recommender/memory_recommender.py --project [slug]
 #   2. It will analyze your project and recommend a system
 #   3. It will update this file with the selected system and config
 #   4. Then run memory-advisor to provision the system
@@ -249,7 +248,7 @@ ecommender\memory_recommender.py --project [slug]
 notes:
   - All projects include memory-ladder (Layer 4+) for cross-session memory
   - Additional memory systems are project-dependent (see memory-recommender output)
-  - For more info: skills/memorydvisor/SKILL.md
+  - For more info: skills/memory/advisor/SKILL.md
 ```
 
 Also update `AGENTS.md` and `CLAUDE.md` to note that MindPalace is always enabled:
@@ -417,9 +416,8 @@ Scripts that call external APIs should use `get_secret()` from `_lib_data.py` as
 |---|---|
 | Recommend skills for the project | `skills/meta/skillmaster/SKILL.md` |
 | Extract tech stack from existing project | `skills/tech-stack-extractor/SKILL.md` |
-| Recommend memory system for this project | `skills/memory
-ecommender\SKILL.md` |
-| Provision the chosen memory system | `skills/memorydvisor/SKILL.md` |
+| Recommend memory system for this project | `skills/memory/recommender/SKILL.md` |
+| Provision the chosen memory system | `skills/memory/advisor/SKILL.md` |
 | Run operator for ongoing routing | `skills/operator/SKILL.md` |
 | Audit creds in vault vs .env | `skills/secrets-audit/SKILL.md` |
 

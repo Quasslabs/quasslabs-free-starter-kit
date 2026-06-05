@@ -9,19 +9,16 @@ No setup required — invoke directly. project-env-setup generates docker-compos
 
 ## Dependencies
 
-stdlib only — no install. The files it generates require Docker to actually run the local stack.
+stdlib only — no install. The files it generates require Docker for the local stack they describe.
 
 ## Credentials / vault
-
-None. Generated .env templates have placeholder values; fill from your secrets store at use time.
+None. Generated .env templates have placeholder values; fill from vault at use time.
 
 ## How to run
-
 ```
 Invoke skill: skills/lifecycle/project-env-setup/SKILL.md
 ```
 Run after agent-setup-wizard for a new project. Outputs docker-compose.local.yml + .env.local.
 
 ## Verify it works
-
 1. Invoke in a new project directory → docker-compose.local.yml + .env.local created.

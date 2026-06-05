@@ -18,6 +18,16 @@ Source: `<notes>/...` → "Full triage — 2026-05-16".
 
 ---
 
+## Repo additions — batch-03 (pattern-after, 2026-05-27)
+
+- **`forrestchang/andrej-karpathy-skills` (102k★)** — single CLAUDE.md file distilling Karpathy's LLM coding pitfall observations. Pattern-after for project CLAUDE.md guidance. 5 key principles to embed in generated CLAUDE.md files:
+  1. **Verify before assuming** — check exact function/type/variable names exist before using them; don't guess at APIs.
+  2. **Test early and often** — run tests after every non-trivial change, not just at the end.
+  3. **Prefer minimal implementations** — the simplest code that satisfies the requirement is almost always the right choice; fight the urge to over-engineer.
+  4. **Use exact error messages** — paste the literal error into prompts, not a paraphrase; paraphrasing loses diagnostic information.
+  5. **Plan before coding** — write out the approach in a scratchpad comment before writing code; this surfaces bad assumptions before they become bugs.
+- Add these as "Operating principles" bullet points in Phase 8 CLAUDE.md draft output.
+
 ## Repo additions — 2026-05-18 triage (Pull-in attribution)
 
 Source: `<notes>/...` → "TQuass full triage — 2026-05-15".

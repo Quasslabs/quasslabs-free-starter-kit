@@ -18,11 +18,18 @@ None.
 ## .claude / harness wiring (optional enforcement hook)
 
 The skill works without this, but drifts over long sessions without it.
-To prevent drift, wire a `UserPromptSubmit` hook in your agent's settings that reads
-`_context/ug-ug-level` and prepends a one-line directive each turn.
+To install the enforcement hook that re-injects the active ug-ug level each turn:
 
-**`update-config` is not included in this kit** — see your agent harness docs
-(Claude Code: `~/.claude/settings.json` hooks section) to wire this manually if needed.
+```
+Invoke skill: skills/update-config/SKILL.md
+```
+
+The hook reads `_context/ug-ug-level` and prepends a one-line directive to each `UserPromptSubmit`.
+See `update-config/SKILL.md` for settings.json hook registration.
+
+## Scheduled task / daemon
+
+None.
 
 ## How to run
 

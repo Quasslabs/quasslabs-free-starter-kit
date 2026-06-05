@@ -39,3 +39,24 @@ Source: `<notes>/...` → "TaylorQ triage 2026-04-30".
 - Origin: `virgiliojr94/book-to-skill` (MIT) pattern — source doc → first-draft skill.
 - **Sprawl guard is the whole design:** always `Status: draft`, written to `wip/<name>/`, NEVER registered/promoted; forces Status:draft via regex even if the model emits otherwise; refuses to overwrite. Human must review + lint + promote.
 - **Use `qwen2.5-coder:14b` (task_type='code'), NOT the 32B:** template-filling timed out on qwen2.5:32b at 240s (large-prompt cold-load); the 14B coder loads + responds faster and is plenty for structured fill.
+
+---
+
+## Repo additions — 2026-05-30 (star triage)
+
+### Prior-art index upgrade: ComposioHQ/awesome-claude-skills replaces travisvn
+Source: `<notes>/...` → "Star triage — 2026-05-30".
+- **`ComposioHQ/awesome-claude-skills` (61k★ Apache-2.0)** — replaces `travisvn/awesome-claude-skills` (12.6k★) as the primary prior-art index. More comprehensive (1000+ skills), more actively maintained. Check this repo in Step 0 BEFORE drafting any new skill to see if a community version already exists.
+- **Updated Step 0 order:** REGISTRY.md → `skillnet search <domain>` (new, via `integrations/skillnet`) → `ComposioHQ/awesome-claude-skills` → `mattpocock/skills` → `google/skills` → our tech-stack.
+
+### proxysoul/soulforge — pattern-after → skill-builder LESSONS
+Source: `zjunlp/SkillNet` + `proxysoul/soulforge` assessment.
+- **Symbol-level operation taxonomy:** SoulForge operates at AST/symbol level (65+ ops: rename, extract, inline, move, wrap, etc.) rather than text-level. Apply when documenting what a skill CAN do to code: distinguish "text replacement" (simple edit) from "symbol operation" (refactor that understands scope + references). Our `improve-codebase-architecture` and `zoom-out` skills describe work at the text level — a "symbol operations" appendix would make their output more precise.
+- **Cost-per-model dispatch matrix:** SoulForge tracks per-subagent cost and routes task segments to the cheapest capable model. Pattern: before spawning any Sonnet call in a skill, check if phi4-mini or qwen2.5-coder:7b can handle the sub-task. Document this as an explicit decision table in the skill's FUNCTIONS.md (same column we already have for "AI-assisted steps → model → reason").
+- **Session checkpointing:** SoulForge persists session state (which ops were applied, what the result was) to SQLite. Pattern: for any multi-step skill that takes >5 min, write a checkpoint file after each phase so the skill can resume mid-task (same discipline as test-loop-orchestrator's state.py).
+
+### SkillNet integration into skill-builder Step 0
+With `integrations/skillnet` now built:
+- Add `skillnet search "<domain or task description>"` as the THIRD prior-art check in Step 0 (after REGISTRY.md, before github-repos.md pull-in scan).
+- If SkillNet returns a result with score ≥80, surface it as a pattern-after candidate before drafting from scratch.
+- `skillnet download <url>` installs to `wip/` — always run skill-linter on downloaded skills before using.

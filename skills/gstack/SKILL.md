@@ -1,5 +1,7 @@
 ---
 name: gstack
+status: beta  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
+parallelizable: yes  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
 description: Apply gstack AI engineering roles (CEO, architect, QA, designer, security) in a Think->Plan->Build->Review->Ship workflow. Invoke per-role or full pipeline.
 ---
 
@@ -317,3 +319,11 @@ After /ship checklist passes, use deliverables-export for client-facing outputs:
   ],
   "next_stage": "plan | build | review | test | ship | reflect | done"
 }
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Filesystem | `<workspace>/...` | Referenced in skill body |

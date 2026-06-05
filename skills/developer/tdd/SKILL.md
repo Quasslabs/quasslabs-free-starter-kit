@@ -10,6 +10,8 @@ description: Test-driven development with red-green-refactor loop. Use when user
 **Ug-ug mode:** lite — output structured plans + reasoning, not deep prose
 **Model:** sonnet — TDD requires judgment about what to test and when to stop; haiku misses the "vertical slice" discipline and produces test-first horizontal slices
 **Tool compatibility:** Claude Code · Cursor · Codex
+**Status:** beta  <!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+**Parallelizable:** yes — no shared mutable state detected (auto-inferred; verify)
 
 **Origin:** Imported from [mattpocock/skills](https://github.com/mattpocock/skills) (engineering/tdd), MIT licensed. Source files preserved at `_source_*.md`. Companion docs (`tests.md`, `mocking.md`, `refactoring.md`, `deep-modules.md`, `interface-design.md`) copied into this folder so the SKILL.md's relative links resolve.
 
@@ -155,3 +157,11 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 [ ] Code is minimal for this test
 [ ] No speculative features added
 ```
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Filesystem | `<workspace>/...` | Referenced in skill body |

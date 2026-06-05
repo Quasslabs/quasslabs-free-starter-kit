@@ -1,7 +1,7 @@
 # SKILL: chat-primer
 
 **Bot:** any  
-**Role:** "Session ready" ritual for any new chat. Auto-wires memory (via memory/recommender) and token-saving MCP servers (token-savior-mcp + context-mode) on first session per project. Idempotent — no-op when already configured. Confirms ug-ug ultra, verifies vault + Ollama, scaffolds missing reference files, flags drift + fine-tune candidates. Outputs a compact SESSION READY card showing what was auto-wired this session.  
+**Role:** "Session ready" ritual for any new chat. Auto-wires memory (via memory/recommender) and the verified-real local Ollama MCP (`ollama-mcp`) on first session per project. (NOTE 2026-06-03: token-savior-mcp + context-mode are NOT installable — pattern-source repos only; no longer auto-wired.) Idempotent — no-op when already configured. Confirms ug-ug, verifies vault + Ollama, scaffolds missing reference files, flags drift + fine-tune candidates. Outputs a compact SESSION READY card.  
 **Ug-ug mode:** full  
 **Model:** haiku — deterministic file reads + availability checks; delegates strategy steps to memory/recommender  
 **Tool compatibility:** Claude Code · Cursor · Codex  
@@ -24,6 +24,35 @@
 | Handoff | `memory/recommender`, `memory/advisor`, `token-savior-mcp`, `context-mode` | Auto-wire delegation |
 
 > **Auto-trigger:** fires at every new chat start on any project that has a CLAUDE.md. Invoked by `agent-setup-wizard` as its final phase (Phase 11).
+
+---
+
+## Invocation mechanism
+
+**This skill is model-driven, NOT a Claude Code settings.json hook.**
+
+The trigger is the global `CLAUDE.md` instruction at `~/<path>`:
+
+```
+At every new chat start:
+1. Check if cwd (or referenced project) has a CLAUDE.md
+2. If yes  → invoke chat-primer immediately
+3. If no   → invoke agent-setup-wizard
+```
+
+Claude reads this instruction at the start of every session and invokes the skill accordingly. There is no `PreSession`, `PreToolUse`, or other hook entry in `settings.json` — the model itself is the trigger.
+
+**What this means in practice:**
+- Works in Claude Code, Cursor, Codex — anywhere the global CLAUDE.md is loaded
+- Does NOT fire in bare API calls (no CLAUDE.md injection there)
+- Can be skipped by the user with "skip primer" — model-driven triggers are soft
+- Re-firing mid-session: invoke manually if context was lost ("re-run chat-primer")
+
+**To add to a new project:** add this block to the project's CLAUDE.md:
+```markdown
+## Session start
+If this project has a CLAUDE.md → invoke `chat-primer` immediately.
+```
 
 ---
 
@@ -66,6 +95,44 @@ Before any other phase, check for `INBOX.md` in the bot's root folder (e.g. `<pr
 Also check `<workspace>/...` for any pending machine-readable relay items addressed to this bot slug or "any". Surface these alongside INBOX items.
 
 **Write side:** `skills/session-relay/SKILL.md` — sessions use this to dispatch items to other bots' INBOXes automatically (runs as Phase 0 of session-handover).
+
+---
+
+## Phase 0.3 — Skillmaster dispatch inbox (5s — Skillmaster sessions only)
+
+**Only runs when:** `project_root` is `skills/` or `<workspace>/...` (Skillmaster context detected).
+
+Scan `skills/_inbox/` for `.md` files with frontmatter `status: wip` or `status: blocked`:
+
+```bash
+# List inbox files with status != done
+grep -rl "^status: " G:/AI/skills/_inbox/ --include="*.md"
+```
+
+- `done` items: skip silently (already completed)
+- `wip` or `blocked` items: surface in SESSION READY card under **"Dispatch inbox"** with skill slug + status + todos
+- No files → skip silently
+
+**Also:** scan `skills/_dispatch/` for unread `*-starter.md` files (dispatched but not yet opened). Count + list slugs.
+
+---
+
+## Phase 0.5 — Agent mailbox check (5s)
+
+Check for unread cross-machine messages from the other Claude instance (Windows hub ↔ Mac mini):
+
+```bash
+python skills/agent-mailbox/mailbox.py read --unread   # Windows
+python3 ~/AI/skills/wip/agent-mailbox/mailbox.py read --unread    # Mac
+```
+
+- Any messages → surface in the SESSION READY card under **"Messages from other instance"**
+- `[STALE]` banner means the canonical thread (on the Mac) was unreachable — note it, don't block
+- None / command absent → skip silently
+- This also auto-flushes any offline-queued outbox messages (Windows side) as a side effect
+
+Mid-session, re-run the same command to pick up messages that arrived after start.
+Skill: `skills/agent-mailbox/SKILL.md`.
 
 ---
 
@@ -212,6 +279,31 @@ DRIFT:     up to date ✓
 
 ---
 
+## Phase 1.5c — Context pressure check
+
+**Goal:** catch large context dumps before they fill the window, offer compression before any work begins.
+
+Estimate opening context size: count characters across all files read so far in Phase 1 + 1.5a + 1.5b.
+
+| Context size | Action |
+|---|---|
+| < 30k chars | No-op — continue |
+| 30k–50k chars | Note in SESSION READY: `CONTEXT: moderate pressure — monitor` |
+| > 50k chars | Offer compression: "Opening context is large (~Xk chars). Run token-compressor to reduce by 60-90%? (y/n)" |
+
+If user approves (or context > 80k chars, auto-run without asking):
+```bash
+python <routines>/token_compressor.py --mode code --stdin < [largest context file]
+# or pipe the HANDOVER.md + OPEN-ITEMS.md through it
+```
+
+Log in SESSION READY:
+```
+CONTEXT:   [size]k chars | [compressed → Yk chars | token-compressor] or [within budget]
+```
+
+---
+
 ## Phase 2 — Ug-ug gate (non-skippable)
 
 Immediately output:
@@ -243,21 +335,30 @@ If HANDOVER.md is stub/empty → report "no prior state".
 
 ## Phase 4 — Token-saving auto-wire (actuator, idempotent)
 
-**Goal:** every project has token-savior-mcp + context-mode (where appropriate) auto-installed without manual setup.
+> **CORRECTED 2026-06-03.** Prior versions of this phase auto-wired `token-savior-mcp`,
+> `@mksglu/context-mode`, and `@modelcontextprotocol/server-ollama` — ALL THREE 404 on npm
+> and were never installable. Any `.mcp.json` written before this date may reference dead
+> packages; re-run this phase to clean them. Only verified-installable servers are wired now.
+
+**Goal:** every project has the verified-real local Ollama MCP wired (where useful) without manual setup. token-savior / context-mode are NOT installable (pattern-source repos only) — do not add them to any `.mcp.json`.
 
 ### Step 4.1 — Determine the per-project profile
 
 Detect project type from signals (in priority order, first match wins):
 
-| Signal | Auto-wire profile | MCPs included |
+| Signal | Auto-wire profile | MCPs included (verified-installable only) |
 |---|---|---|
-| `skills/` in cwd | **skills-hub** | token-savior-mcp + skill-linter + skillmaster auto-active |
-| `terraform/*.tf` present | **iac** | token-savior-mcp + careful-guard active |
-| `package.json` + `next.config.*` | **nextjs** | token-savior-mcp + context-mode + ollama-mcp |
-| `pyproject.toml` or `requirements.txt` | **python** | token-savior-mcp (no context-mode by default — Python files are smaller) |
-| `engagement.json` present | **client** | token-savior-mcp + context-mode + engagement-config-setup auto-load |
-| >50 source files OR ≥10k LOC | **large-codebase** | token-savior-mcp + context-mode |
-| default | **small** | token-savior-mcp only |
+| `skills/` in cwd | **skills-hub** | ollama-mcp (skill-linter + skillmaster are skills, not MCPs) |
+| `terraform/*.tf` present | **iac** | ollama-mcp |
+| `package.json` + `next.config.*` | **nextjs** | ollama-mcp |
+| `pyproject.toml` or `requirements.txt` | **python** | ollama-mcp |
+| `engagement.json` present | **client** | ollama-mcp |
+| >50 source files OR ≥10k LOC | **large-codebase** | ollama-mcp |
+| default | **small** | (none — skip .mcp.json write) |
+
+> Context dedup is currently handled by Claude Code's built-in auto-compact (75% via
+> `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`) + the PreCompact `smart_compressor.py`. A dedicated
+> mid-session dedup MCP is a future clean-room build (see token-savior-mcp LESSONS).
 
 ### Step 4.2 — Write or merge `.mcp.json`
 
@@ -283,55 +384,122 @@ else:
         log_auto_wire(".mcp.json already complete — no-op")
 ```
 
-Canonical MCP server entries (used by every profile that includes them):
+Canonical MCP server entry (verified installable — `ollama-mcp` resolves on npm, v2.1.0):
 
 ```jsonc
 {
   "mcpServers": {
-    "token-savior": {
-      "command": "npx",
-      "args": ["-y", "token-savior-mcp"],
-      "env": {"DEDUP_THRESHOLD": "3"}
-    },
-    "context-mode": {
-      "command": "npx",
-      "args": ["-y", "@mksglu/context-mode"]
-    },
     "ollama": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-ollama"],
-      "env": {"OLLAMA_BASE_URL": "http://localhost:11434"}
+      "args": ["-y", "ollama-mcp"],
+      "env": {"OLLAMA_HOST": "http://localhost:11434"}
     }
   }
 }
 ```
+
+> Before writing, verify the package still resolves: `npm view ollama-mcp version`.
+> If it 404s, skip the write rather than producing a broken `.mcp.json`.
+> NEVER write `token-savior-mcp`, `@mksglu/context-mode`, or `@modelcontextprotocol/server-ollama` — all dead.
+
+### Step 4.2.5 — Heal dead entries
+
+If `.mcp.json` already exists, scan it for the three dead package names above and REMOVE those entries (they cause Claude Code MCP-connect failures). Log what was removed.
 
 ### Step 4.3 — Audit log
 
 Every action writes to `<project>/_context/auto-wire.log`:
 
 ```
-2026-05-20T14:32:11 PHASE=4 PROFILE=nextjs ADDED=token-savior,context-mode FILE=.mcp.json
+2026-06-03T14:32:11 PHASE=4 PROFILE=nextjs ADDED=ollama REMOVED=token-savior,context-mode FILE=.mcp.json
 ```
 
 ### Output
 
 ```
-TOKEN MCPs:
+MCP WIRE:
   profile:   nextjs
-  .mcp.json: ✓ wrote 3 servers (token-savior, context-mode, ollama)
+  .mcp.json: ✓ wrote ollama-mcp [+ removed 2 dead entries]
   audit:     _context/auto-wire.log
 ```
 
 Or, idempotent re-run:
 
 ```
-TOKEN MCPs:
+MCP WIRE:
   profile:   nextjs
-  .mcp.json: ✓ already configured (no-op)
+  .mcp.json: ✓ already correct (no-op)
 ```
 
-For `token-compressor` (CLI tool, not MCP): mentioned in SESSION READY only as `[standby]` — it's invoked on demand for large doc injection, not auto-wired.
+For `token-compressor` (a real local Python CLI, not an MCP): auto-offered in Phase 1.5c when context > 50k chars; auto-run when > 80k chars. This is the genuine token-saving path.
+
+**Phase 4 is no longer a hard gate.** Wiring ollama-mcp is useful but optional; a missing `.mcp.json` does not block work. The real context controls are auto-compact (75%) + smart_compressor + token-compressor (Phase 1.5c).
+
+---
+
+## Phase 4.5 — Active skills block auto-wire (actuator, idempotent)
+
+**Goal:** every project CLAUDE.md has a `<!-- skill-audit-candidates -->` block so the 8-prompt skill audit hook has a candidate list to check against. Without this block, the hook fires but does nothing.
+
+### Step 4.5.1 — Check for existing block
+
+Read `{project_root}/CLAUDE.md`. Search for `<!-- skill-audit-candidates -->`.
+
+If found → skip entirely (idempotent). Log: `SKILLS BLOCK: already present`.
+
+### Step 4.5.2 — Detect project type
+
+Reuse the same signals from Phase 4:
+
+| Signal | Project type | Candidate set |
+|---|---|---|
+| `skills/` in cwd | skills-hub | skillmaster · skill-builder · skill-linter · ps1-sanitizer · session-skill-auditor |
+| `engagement.json` present | client / scope | scope-phase-runner · storyboard-taskcrafter · estimate-chat-primer · scope-vetter · session-skill-auditor |
+| `terraform/*.tf` present | iac | terraform-safe · deployer/terraform-validator · qa-auditor/security-gate · ps1-safe-script · session-skill-auditor |
+| `package.json` + `next.config.*` | nextjs / web-app | developer/careful-guard · qa-auditor/dev-gate · code-reviewer · ps1-safe-script · session-skill-auditor |
+| `package.json` + `react-native` in deps | mobile-rn | developer/careful-guard · android-build-deploy · qa-auditor/dev-gate · ps1-safe-script · session-skill-auditor |
+| `pyproject.toml` or `requirements.txt` | python / data | developer/careful-guard · qa-auditor/dev-gate · qa-auditor/supply-chain-scanner · ps1-safe-script · session-skill-auditor |
+| `.github/workflows/*.yml` present | any with CI/PRs | + ollama-pr-gemini-watcher · ollama-pr-replier · code-reviewer |
+| default (no strong signal) | general | developer/careful-guard · qa-auditor/dev-gate · ps1-safe-script · session-skill-auditor |
+
+Always include `ps1-safe-script` (this machine is always Windows + Git Bash) and `session-skill-auditor` (self-reinforcing).
+
+### Step 4.5.3 — Write the block
+
+Append to `{project_root}/CLAUDE.md` (before the last `---` or at end of file):
+
+```markdown
+## Active skills
+
+<!-- skill-audit-candidates -->
+- developer/careful-guard — before editing existing source files
+- qa-auditor/dev-gate — before QA handoff
+- code-reviewer — before opening a PR
+- ps1-safe-script — before any PowerShell output
+- ollama-pr-gemini-watcher — auto-triggers on gh pr create via hook
+- session-skill-auditor — periodic check that all relevant skills are active
+<!-- /skill-audit-candidates -->
+```
+
+Replace the skill list with the project-type-appropriate set from Step 4.5.2.
+
+Add one-line description per skill using this format: `- {skill-name} — {when it applies in ≤8 words}`
+
+### Step 4.5.4 — Log
+
+Write to `_context/auto-wire.log`:
+```
+{ts} PHASE=4.5 PROFILE={project_type} WROTE=active-skills-block FILE=CLAUDE.md
+```
+
+Report in SESSION READY card:
+```
+SKILLS BLOCK: wrote 6-skill candidate list (nextjs profile) → CLAUDE.md
+```
+or if already present:
+```
+SKILLS BLOCK: already configured
+```
 
 ---
 
@@ -577,6 +745,7 @@ AUTO-WIRED THIS SESSION:
 ────────────────────────────────────────────────────
 HANDOVER:  [loaded — N open / N done] | [no prior state]
 TOKEN:     [context-mode + token-savior | token-savior only | ⚠ not configured]
+SKILLS:    [wrote 6-skill candidate list (nextjs) → CLAUDE.md] | [already configured]
 MEMORY:    [memory/memory-ladder ✓ N entries | first session — seeded | ⚠ backend unreachable]
 VAULT:     [✓ pw=set · entries=N] | [⚠ pw not set]
 OLLAMA:    [✓ phi4-mini · qwen2.5-coder:7b · qwen3:8b] | [✗ offline]

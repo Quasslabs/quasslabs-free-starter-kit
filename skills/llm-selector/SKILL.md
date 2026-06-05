@@ -1,5 +1,7 @@
 ﻿---
 name: llm-selector
+status: beta  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
+parallelizable: yes  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
 description: Recommend the optimal LLM for a skill with fallback chain + cost estimate. Use when picking a model or reviewing cost. Covers cloud + local providers.
 ---
 
@@ -308,3 +310,30 @@ All steps are deterministic lookups, structured reasoning over fixed input, or t
     { "type": "happy_path", "input": "...", "expected_shape": "...", "pass_criterion": "..." }
   ]
 }
+
+## Permissions
+
+<!-- v2-backfill 2026-05-31: auto-inferred — verify before ready/ promotion -->
+
+| Type | Pattern | Why |
+|---|---|---|
+| Bash | `python *` | Default — refine to actual commands |
+
+---
+
+## Data collection (art-train)
+
+```python
+import sys; sys.path.insert(0, r"<workspace>/...")
+from art_train_collector import log_pair, update_outcome
+
+event_id = log_pair("llm-selector/select", task_description, model_selected, model="phi4-mini")
+
+# If no retry was needed:
+update_outcome("llm-selector/select", event_id, "ok")
+
+# If the selection was wrong and required escalation/retry:
+update_outcome("llm-selector/select", event_id, "wrong")
+```
+
+**Training target:** Feeds `task-router-local` — teaches the router which model is right for each task pattern.

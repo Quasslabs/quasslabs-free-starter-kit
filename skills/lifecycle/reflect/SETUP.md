@@ -20,7 +20,8 @@ None.
 ```
 Invoke skill: skills/lifecycle/reflect/SKILL.md
 ```
-Invoke at session end. Appends dated lessons to `_context/LESSONS.md`.
+Invoke at session end. Appends dated lessons to `_context/LESSONS.md` and optionally
+promotes key lessons to the hub `LESSONS.md`.
 
 ## Verify it works
 

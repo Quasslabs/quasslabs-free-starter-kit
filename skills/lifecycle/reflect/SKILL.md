@@ -95,10 +95,10 @@ The 1–2 most important changes to make to a SKILL.md, CLAUDE.md, or LESSONS.md
 
 ## Phase 3 — Write to LESSONS.md
 
-Append the retrospective to `LESSONS.md` in the project root:
+Append the retrospective to `_context/LESSONS.md` (this is the canonical path that `chat-primer` reads and the `session-wrap-up.py` auto-lessons pipeline writes):
 
 ```
-<project>/...]\LESSONS.md
+<project>/...]\_context\LESSONS.md
 ```
 
 Format:
@@ -184,7 +184,7 @@ MEMORY PROMOTIONS
 SKILL GAPS
   [list or "none"]
 
-Written to: <project>/...]\LESSONS.md ✓
+Written to: <project>/...]\_context\LESSONS.md ✓
 ```
 
 ---
@@ -205,7 +205,7 @@ Written to: <project>/...]\LESSONS.md ✓
 
 | Type | Pattern | Why |
 |---|---|---|
-| Filesystem | `<project>/...` (write) | Append retrospective to the project LESSONS.md (Phase 3) |
+| Filesystem | `<project>/...` (write) | Append retrospective to the project `_context/LESSONS.md` (Phase 3) |
 | Filesystem | `skills/.auto-memory/feedback_*.md` (write) | Write memory promotions (Phase 4) |
 
 ## Handoffs
