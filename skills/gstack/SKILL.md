@@ -1,9 +1,17 @@
----
-name: gstack
-status: beta  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
-parallelizable: yes  # v2-backfill 2026-05-31: auto-inferred, verify before ready/ promotion
-description: Apply gstack AI engineering roles (CEO, architect, QA, designer, security) in a Think->Plan->Build->Review->Ship workflow. Invoke per-role or full pipeline.
----
+# SKILL: gstack
+
+**Bot:** any
+**Role:** Apply gstack AI engineering roles (CEO, architect, QA, designer, security) in a Think->Plan->Build->Review->Ship work...
+**Ug-ug mode:** full
+**Model:** phi4-mini (routing); sonnet (content generation)
+**Tool compatibility:** Claude Code
+**Status:** beta
+**Parallelizable:** yes
+**License:** mit
+**Origin:** derived-from:https://github.com/garrytan/gstack
+**Pack:** michael-inbound-task-graph
+**Commercial:** ready
+**Tier:** free
 
 ## Model
 
@@ -24,6 +32,41 @@ defined responsibilities, a trigger command, and a stop condition. Do not blend 
 in a single response -- one role, one job, one output.
 
 Source: https://github.com/garrytan/gstack
+
+## Attribution
+
+The role/stage command taxonomy (`/office-hours`, `/plan-ceo-review`, `/plan-eng-review`,
+`/plan-design-review`, `/review`, `/qa`, `/ship`, `/cso`, `/design-shotgun`, `/design-html`,
+`/careful`, `/guard`) and the "Think -> Plan -> Build -> Review -> Test -> Ship -> Reflect"
+pipeline framing are adapted from Garry Tan's gstack:
+https://github.com/garrytan/gstack
+
+gstack is MIT Licensed:
+
+```
+Copyright (c) 2026 Garry Tan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+Stage content, checklists, bot-ecosystem integration, and Lambda-candidate mapping in this skill
+are independently written for the G:\AI\skills hub.
 
 ---
 
@@ -214,7 +257,7 @@ INSIDE an agent session to give it structured roles. Use it together with the bo
 
 | gstack stage/role | Our bot | Skill |
 |---|---|---|
-| Think (/office-hours) | ballparker | transcript-research, market-research |
+| Think (/office-hours) | estimation/proposal bot | transcript-research, market-research |
 | Plan (/plan-ceo-review, /plan-eng-review) | scope-master | engagement-bootstrap, storyboard-builder |
 | Plan (/plan-design-review) | designer | screen-builder, interactive-proto |
 | Build | developer | staged-test-runner, dev-server-hygiene, e2e-auth-cookie |
@@ -227,7 +270,7 @@ INSIDE an agent session to give it structured roles. Use it together with the bo
 ### How to invoke gstack within a bot session
 
 From any bot context, invoke gstack by reading the skill:
-  Read: skills/gstack/SKILL.md
+  Read: G:\AI\skills\wip\gstack\SKILL.md
   Then invoke the relevant stage command.
 
 From operator routing table:
@@ -240,7 +283,7 @@ From operator routing table:
 **1. Ug-ug integration**
 All gstack outputs default to ug-ug lite mode (terse, exact paths, no padding).
 Switch: /full-output for verbose mode, /ultra for maximum compression.
-See: skills/ug-ug/SKILL.md
+See: G:\AI\skills\wip\ug-ug\SKILL.md
 
 **2. LLM targeting**
 Each stage should target the appropriate model:
@@ -252,14 +295,14 @@ Each stage should target the appropriate model:
 **3. Operator routing**
 If gstack encounters a request that belongs to a different bot, hand off via operator:
 - Bug triage -> qa-auditor/defect-triage
-- Cost estimate -> ballparker
+- Cost estimate -> estimation/proposal bot
 - Design artifact -> designer
-See: skills/operator/SKILL.md (routing table)
+See: G:\AI\skills\wip\operator\SKILL.md (routing table)
 
 **4. Memory handoff (/reflect enhancement)**
 The /reflect output must land in one of:
 - LESSONS.md (in the project root)
-- memory-ladder (for cross-session persistence): skills/memory/memory-ladder/SKILL.md
+- memory-ladder (for cross-session persistence): G:\AI\skills\wip\memory\memory-ladder\SKILL.md
 - ug-ug-compress pass on the context file before any handoff
 
 **5. QA enhancement (/qa + test-creator)**
@@ -267,11 +310,11 @@ Before running /qa, call test-creator to generate the expected test plan from sc
   1. qa-auditor/test-creator reads scope -> generates test plan
   2. gstack /qa validates: does implementation cover the test plan?
   3. Dev-gate passes only when both match
-See: skills/qa-auditor/test-creator/SKILL.md
+See: G:\AI\skills\wip\qa-auditor\test-creator\SKILL.md
 
 **6. Deliverables (/ship enhancement)**
 After /ship checklist passes, use deliverables-export for client-facing outputs:
-  skills/deliverables-export/SKILL.md
+  G:\AI\skills\wip\deliverables-export\SKILL.md
 
 ## Handoffs
 
@@ -326,4 +369,4 @@ After /ship checklist passes, use deliverables-export for client-facing outputs:
 
 | Type | Pattern | Why |
 |---|---|---|
-| Filesystem | `<workspace>/...` | Referenced in skill body |
+| Filesystem | `G:\AI\*` | Referenced in skill body |

@@ -1,0 +1,15 @@
+{
+  "name": "operator",
+  "entry_point": "src/operator_skill.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/operator"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "notify",
+  "entry_point": "src/notify.py",
+  "uses": [],
+  "dependencies": {
+    "python": ["requests"],
+    "ollama_models": [],
+    "vault_entries": ["Telegram/bot-token", "Telegram/chat-id"]
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/notify"
+}

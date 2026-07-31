@@ -1,0 +1,13 @@
+description = "Draft a new skill SKILL.md header + folder layout from a one-line intent."
+prompt = """
+Draft a new skill with name and role:
+{{args}}
+
+Steps:
+1. Suggest a kebab-case slug.
+2. Emit a SKILL.md header (schema v2.1: Bot, Role, Ug-ug mode, Model, Tool compatibility, Status, Parallelizable, License, Origin, Pack, Commercial, Tier).
+3. List the 7 required files (SKILL.md, FUNCTIONS.md, LESSONS.md, INSTALL.md, SETUP.md, REPORT.md, manifest.json) + commands/ + src/ + tests/.
+4. Hand off to /skill-linter once the body is filled in.
+
+Skill: skills/skill-builder/SKILL.md
+"""

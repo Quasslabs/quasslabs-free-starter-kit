@@ -1,0 +1,14 @@
+description = "Validate a SKILL.md against the slim schema (required header fields + required sections)."
+prompt = """
+Lint the SKILL.md at: {{args}}
+
+Required header fields: Bot, Role, Ug-ug mode, Model, Status, Parallelizable.
+Required body sections: ## When to invoke, ## Handoffs.
+
+Run:
+  python -m skill_linter <path>
+
+Exit code 0 = clean. 1 = issues; print the issue list.
+
+Skill: skills/skill-linter/SKILL.md
+"""

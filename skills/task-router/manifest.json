@@ -1,0 +1,15 @@
+{
+  "name": "task-router",
+  "entry_point": "src/task_router.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/task-router"
+}

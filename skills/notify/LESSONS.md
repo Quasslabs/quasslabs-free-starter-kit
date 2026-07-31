@@ -1,10 +1,8 @@
-# Lessons Learned — notify
+# Lessons — notify
 
-| Lesson | Why it matters | Source |
-|---|---|---|
-| Keep credentials and target scope outside generated artifacts. | This skill interacts with services where leaked tokens, wrong accounts, or wrong targets create real risk. | SKILL.md external service rules |
-| Extract deterministic helpers before calling AI for notify. | Parsing, validation, routing, and manifests are cheaper and safer as pure functions. | FUNCTIONS.md classification |
-| Make handoffs explicit instead of relying on chat context. | Downstream skills and agents need paths, payloads, and auth assumptions recorded in files. | SKILL.md handoffs |
-| **Fetcher exit states: `ok / empty / degraded / error` — not just exit 0.** A fetcher returning 0 rows because the token was revoked must be classified `degraded`, not `ok`. Callers should propagate the worst child state and `notify.report()` must surface degraded sources as a separate line (`⚠️ N data sources down: Gmail, Calendar`). | morning-routine 2026-05-14: Gmail token revoked + Calendar tokens missing for unknown duration; orchestrator logged `Last Result: 0` daily while producing zero data. Silent success = invisible failure. | session 2026-05-14 |
-| **Token-expiry alerts go in the morning report, not a separate channel.** When a fetcher logs an auth-marker substring (`invalid_grant`, `token expired`, `401`, `tokens not found`), the orchestrator should add the source to a DEGRADED list and include it in `notify.report()`. Don't fire a separate `red_gate` per expired token — they all need the same action (browser re-consent) and one consolidated line is enough. | session 2026-05-14: re-auth alerts wired via shared `AUTH_ERROR_MARKERS` tuple in `morning_routine.py` log() function. | morning-routine LESSONS.md |
-| **Telegram payload must degrade gracefully if creds missing.** `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` absent → log and return False, never raise. Don't make notify a hard dependency for the orchestrator's exit code. | session 2026-05-14: `telegram_send()` in `morning_routine.py` returns False on missing env, run continues. | morning-routine LESSONS.md |
+## 2026-06-11 — initial release
+
+- One message per red gate. Combining multiple blockers into a single message defeats the DONE/SKIP reply contract.
+- Never include secret values — reference key names (e.g. `STRIPE_SECRET_KEY`) only. Telegram logs are not a vault.
+- On send failure, append to `logs/notify-failed.log` with timestamp + body. Silent drops cause agents to think they delivered a message they didn't.
+- Telegram Markdown parse mode is finicky around underscores and brackets in code-like strings — fall back to plain text on parse errors rather than failing the call.

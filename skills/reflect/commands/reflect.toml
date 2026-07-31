@@ -1,0 +1,19 @@
+description = "End-of-session retrospective. Appends a dated four-part retro to _context/LESSONS.md."
+prompt = """
+Run a retrospective for: {{args | default: "this session"}}.
+
+Produce four short sections (1-2 sentences each):
+- What worked well — do more of this
+- Friction — change this process
+- Near-misses — luck, not skill (highest-value section)
+- Actions — 1-2 specific changes to SKILL.md / LESSONS.md / process
+
+Append the result under a dated `## Retro --` heading to `_context/LESSONS.md`.
+
+Rules:
+- Append only; never overwrite.
+- Date-stamp every entry.
+- If zero actions emerge, the session was trivial — skip the retro.
+
+Skill: skills/reflect/SKILL.md
+"""

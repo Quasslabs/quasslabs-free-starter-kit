@@ -1,39 +1,25 @@
-# SETUP: notify
+# Setup — notify
 
-**Skill:** `notify`
-**Setup tier:** light (Telegram bot token + chat ID)
-**Last verified:** 2026-05-31
+## Env vars
 
-## Dependencies
-
-| Dep | Version | Install | Notes |
-|---|---|---|---|
-| requests (Python) | any | `pip install requests` | HTTP POST to Telegram API |
-| Python | 3.x | present | runtime only |
-
-## Credentials / vault
-
-| Secret | Vault entry | How used |
+| Name | Required | Notes |
 |---|---|---|
-| Telegram bot token | `Telegram/bot-token` (KeePass ai-hub.kdbx) | `get_secret("Telegram/bot-token")` |
-| Telegram chat ID | `Telegram/chat-id` (KeePass ai-hub.kdbx) | `get_secret("Telegram/chat-id")` |
+| `TELEGRAM_BOT_TOKEN` | yes | Bot token from @BotFather |
+| `TELEGRAM_CHAT_ID` | yes | Your chat id from `getUpdates` |
 
-Alternatively set as Windows env vars `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`.
-Run `telegram-setup` skill first if Telegram is not yet wired.
+## Vault entries (KeePassXC)
 
-## .claude / harness wiring
+| Entry name | Field | Maps to env |
+|---|---|---|
+| `Telegram/bot-token` | password | `TELEGRAM_BOT_TOKEN` |
+| `Telegram/chat-id` | password | `TELEGRAM_CHAT_ID` |
 
-None required beyond vault access.
+## Ollama models
 
-## How to run
+None required.
 
-```python
-# From <routines>/_lib_ollama.py
-from _lib_ollama import notify_telegram
-notify_telegram("Subject", "Body text", "report")   # report | red_gate | checkpoint
-```
+## One-time Telegram setup
 
-## Verify it works
-
-1. `python -c "from _lib_ollama import notify_telegram; notify_telegram('Test', 'notify wired', 'report')"`
-2. Telegram message arrives within 5 seconds.
+1. Message `@BotFather` -> `/newbot` -> copy token.
+2. Message your new bot anything, then `curl "https://api.telegram.org/bot<TOKEN>/getUpdates"` to find your chat id.
+3. Store both in the vault entries above.

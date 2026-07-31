@@ -1,0 +1,15 @@
+description = "Pick the optimal model + fallback chain + cost estimate for a task type."
+prompt = """
+Run llm-selector for task_type: {{args | default: "reason"}}.
+
+Task types:
+- classify · extract → phi4-mini (local)
+- code → qwen2.5-coder:7b (local)
+- reason → qwen2.5:7b (local)
+- draft → claude-sonnet (cloud)
+- judge → claude-opus (cloud)
+
+Returns: {"primary": "...", "fallback": [...], "estimated_cost_per_1k": 0.0}
+
+Skill: skills/llm-selector/SKILL.md
+"""

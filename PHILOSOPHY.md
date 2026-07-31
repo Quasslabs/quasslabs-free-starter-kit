@@ -29,4 +29,4 @@ Don't marry one tool. Route the task to the right one — that's what `task-rout
 
 ## Structure compounds
 
-One skill is a note. Fifty composable skills that hand off to each other is a system that builds fast and consistently — because every recurring decision is captured once and reused. Start with `agent-setup-wizard` on one repo and grow from there.
+One skill is a note. Fifty composable skills that hand off to each other is a system that builds fast and consistently — because every recurring decision is captured once and reused. Start with `task-router` on your next multi-step job and grow from there.

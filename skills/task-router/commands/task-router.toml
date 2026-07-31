@@ -1,0 +1,14 @@
+description = "Pre-flight evaluator. Surfaces red gates (immediate blockers) and yellow notes (assumptions) before any skill runs."
+prompt = """
+Run task-router on: {{args}}
+
+Emit a routing card:
+- RED gates: missing credentials / irreversible actions / blocked steps
+- YELLOW notes: assumptions, ambiguous requirements
+- Estimated cost
+- Recommended next skill
+
+Do NOT execute the task until red gates are resolved.
+
+Skill: skills/task-router/SKILL.md
+"""

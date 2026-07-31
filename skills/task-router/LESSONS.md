@@ -1,7 +1,7 @@
-# Lessons Learned — task-router
+# Lessons — task-router
 
-| Lesson | Why it matters | Source |
-|---|---|---|
-| Keep credentials and target scope outside generated artifacts. | This skill interacts with services where leaked tokens, wrong accounts, or wrong targets create real risk. | SKILL.md external service rules |
-| Extract deterministic helpers before calling AI for task-router. | Parsing, validation, routing, and manifests are cheaper and safer as pure functions. | FUNCTIONS.md classification |
-| Make handoffs explicit instead of relying on chat context. | Downstream skills and agents need paths, payloads, and auth assumptions recorded in files. | SKILL.md handoffs |
+## 2026-06-11 — initial release
+
+- Keyword heuristics catch ~80% of red gates without LLM cost. Anything less obvious belongs in `ollama-task-router` (which uses a real model).
+- Yellow notes are NOT warnings to ignore — they show up in the session report so the human reviews assumptions before sign-off.
+- `estimated_cost` is always 0.0 in the free tier; downstream `llm-selector` computes the real number.

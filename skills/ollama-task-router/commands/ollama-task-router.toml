@@ -1,0 +1,17 @@
+description = "Classify a task as local-Ollama or paid-cloud. Returns target + model + reason."
+prompt = """
+Run ollama-task-router on: {{args}}
+
+Returns: {"target": "local"|"cloud", "model": "...", "reason": "..."}
+
+Local-eligible:
+- Classify / extract / route → phi4-mini
+- Code gen / refactor → qwen2.5-coder:7b
+- Multi-step reasoning → qwen2.5:7b
+
+Cloud-required:
+- Long-form narrative draft → claude-sonnet
+- High-stakes judgment → claude-opus
+
+Skill: skills/ollama-task-router/SKILL.md
+"""

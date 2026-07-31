@@ -1,0 +1,17 @@
+description = "File-based cross-session memory. Load, save, or append per-slug memory entries."
+prompt = """
+Apply memory-ladder for slug: {{args | default: "default"}}.
+
+Storage: ~/.memory/<slug>.json
+Operations:
+- load(slug)         → returns dict (empty if file missing)
+- save(slug, payload) → writes full payload
+- append(slug, entry) → appends to payload["entries"] list
+
+Layer guide:
+- L1 identity anchor · L2 micro-compaction · L3 narrative summary
+- L4 9-point structural state · L5 durable facts
+- L6 promote-to-rule · L7 handoff block
+
+Skill: skills/memory-ladder/SKILL.md
+"""

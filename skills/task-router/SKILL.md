@@ -1,290 +1,77 @@
 # SKILL: task-router
 
-**Bot:** operator · any
-**Role:** Pre-flight evaluator. Runs as Step 0 before any skill execution. Returns a routing card that assigns each sub-task to the right AI model, identifies human gates (red = immediate blocker, yellow = note and continue), and estimates cost. Prevents mid-task stalls caused by missing credentials or unclear requirements.
+**Bot:** any · pre-flight evaluator
+**Role:** Step-0 pre-flight that classifies a task, surfaces red gates (immediate human blockers) and yellow notes (assumptions to confirm later), and emits an estimated-cost routing card. Prevents mid-task stalls from missing credentials or unclear requirements.
 **Ug-ug mode:** lite
-**Model:** haiku — routing is deterministic from a fixed decision table; no generation needed
-**Tool compatibility:** Claude Code · Cursor · Codex
-**Status:** beta
-**Parallelizable:** no - routes work to a single local Ollama instance (one GPU); concurrent runs contend for model load
-
----
-
-## Model
-
-**Verdict:** `phi4-mini` — routing is deterministic from a fixed decision table; no generation needed.
-
-| Tier | Pick | Notes |
-|---|---|---|
-| Cloud | haiku | Fixed decision table lookup; no generation needed |
-| Local (installed) | phi4-mini | Fast; ideal for classify/route tasks |
-| Local (ideal) | phi4-mini | Already installed; perfect fit |
-
----
+**Model:** any
+**Tool compatibility:** Claude Code · Codex · Cursor
+**Status:** stable
+**Parallelizable:** yes
+**License:** mit
+**Origin:** original
+**Pack:** core
+**Commercial:** ready
+**Tier:** free
 
 ## When to invoke
 
-- Automatically: operator calls this before every routing decision (Step 0)
-- Manually: "route this task", "who should do this?", "what do I need to unblock this?"
-- Any time a new task, story, or skill sequence is about to begin
+Triggers:
+- Before starting any multi-step task or skill sequence
+- User says "route this task", "what do I need to unblock this?"
+- Slash trigger: `/task-router`
 
----
+## Gate rules
 
-## AI assignment rules
+### RED — full blocker
 
-Apply in order — first match wins:
+- External account not created (Stripe, Twilio, etc.)
+- API key / secret missing
+- Irreversible action pending (prod deploy, force-push)
+- Access credential unavailable
 
-```
-Task type                                           → Model              Cost
-─────────────────────────────────────────────────────────────────────────────
-Classify / route / format / sort / short summarize  → phi4-mini          $0 (local)
-Code gen / test write / code fix / PR draft         → qwen2.5-coder:7b  $0 (local)
-Planning / orchestration / multi-step analysis      → gemma4:e2b         $0 (local)
-Code review with judgment / ambiguous failure       → Sonnet             ~$0.03–0.10
-Architecture decision / first-time skill writing    → Sonnet             ~$0.05–0.15
-High-stakes judgment / complex trade-off            → Opus               ~$0.15–0.50
-Human-only (see gate rules below)                   → ⛔ Human           N/A
-```
+### YELLOW — partial blocker
 
-**Default when uncertain:** try local first. If Ollama output quality is insufficient after 2 attempts, escalate to Sonnet. Log the escalation reason.
+- Config value can be mocked
+- Requirement ambiguous (can proceed with stated assumption)
+- Later-stage human checkpoint
 
----
+## Steps
 
-## Human gate rules
+1. `evaluate(task)` runs heuristic rules over the task string.
+2. Returns red_gates + yellow_notes + estimated_cost + recommended_skill.
+3. Caller emits the routing card before any other skill executes.
 
-### 🔴 RED — Full blocker. Notify immediately. Do not proceed with this sub-task.
+## Input
 
-Trigger on any of:
-- External service account not yet created (RevenueCat, Twilio, Stripe, Clerk, etc.)
-- API key / secret not in Secrets Manager or `.env`
-- Billing or legal approval required
-- Irreversible action: prod deploy, DB schema migration, PR merge, `git push --force`
-- Access credential not available (AWS profile, SSH key, device pairing)
-
-**Action:** Call `notify.red_gate(task, blocker)` immediately. Continue other unblocked tasks. Re-check gate status before retrying the blocked sub-task.
-
-### 🟡 YELLOW — Partial blocker. Note it, work around it, surface in report.
-
-Trigger on any of:
-- Config value unknown but can be mocked/stubbed for now
-- Requirement ambiguous — can proceed with a stated assumption, flag for review
-- Human checkpoint needed at a later stage (not blocking start)
-- Environment variable needs confirmation but has a safe default
-- External dependency not yet available but not needed until later in the pipeline
-
-**Action:** Record the assumption or gap. Continue work. Include in the session report or morning digest.
-
----
-
-## Output format
-
-Emit a routing card before any skill execution:
-
-```
-┌─ TASK ROUTER ─────────────────────────────────────────────────────────┐
-│ Task: [task description — 1 line]                                     │
-│                                                                       │
-│ AI assignment:                                                        │
-│   [Sub-task 1]        → phi4-mini          ($0 local)                │
-│   [Sub-task 2]        → qwen2.5-coder:7b  ($0 local)                │
-│   [Sub-task 3]        → Sonnet             (~$0.05 cloud)            │
-│                                                                       │
-│ 🔴 Human gates (BLOCKING — notifying now):                           │
-│   □ [Exact action required — e.g. "Add REVENUECAT_KEY to Secrets    │
-│     Manager before entitlements step can run"]                       │
-│                                                                       │
-│ 🟡 Notes (non-blocking — will surface in report):                    │
-│   • [Assumption or partial gap]                                      │
-│                                                                       │
-│ Est. cost: ~$X cloud  +  $0 local                                    │
-└───────────────────────────────────────────────────────────────────────┘
-```
-
-If no human gates: omit the 🔴 section entirely (do not print "none").
-If no yellow notes: omit the 🟡 section.
-If fully local: show "Est. cost: $0 (fully local)".
-
----
-
-## Step-by-step execution
-
-### Step 1 — Parse the task
-
-Extract:
-- What is being built or done (the deliverable)
-- What systems it touches (API, DB, external service, file, device)
-- What the output is (code, report, deploy, PR, etc.)
-
-### Step 2 — Break into sub-tasks
-
-Split the task into the smallest independent steps. Each step gets its own model assignment.
-
-Examples:
-```
-Task: "Implement entitlement gate on /api/word/save"
-Sub-tasks:
-  1. Plan implementation steps         → gemma4:e2b
-  2. Write UserService.isEntitled()    → qwen2.5-coder:7b
-  3. Add gate middleware               → qwen2.5-coder:7b
-  4. Write unit + integration tests    → qwen2.5-coder:7b
-  5. Review PR before merge            → Sonnet
-```
-
-### Step 3 — Check gates
-
-For each sub-task, check:
-- Does it require a credential, account, or external service that may not exist?
-- Is it irreversible?
-- Does it require a human decision before the AI can proceed?
-
-Flag RED or YELLOW accordingly.
-
-### Step 4 — Emit routing card
-
-Print the routing card. If RED gates exist, call `notify.red_gate()` before printing.
-
-### Step 5 — Hand off to operator
-
-Operator uses the routing card to:
-- Set the `FLAGS` in its routing block
-- Override model selection in downstream skill calls
-- Pause on RED-blocked sub-tasks; proceed with others
-
----
-
-## Common task → model mappings (quick reference)
-
-| Task | Model |
-|---|---|
-| Classify email as bug / addition / change | phi4-mini |
-| Route a request to the right bot | phi4-mini |
-| Generate user story from storyboard data | qwen2.5:7b |
-| Write a code fix from a test failure | qwen2.5-coder:7b |
-| Generate test stubs from AC | qwen2.5-coder:7b |
-| Write a PR description | qwen2.5-coder:7b |
-| Plan implementation steps for a feature | gemma4:e2b |
-| Office hours on a new feature idea | gemma4:e2b |
-| Review PR for production readiness | Sonnet |
-| Diagnose ambiguous multi-file failure | Sonnet |
-| Architecture decision (data model, service boundary) | Sonnet |
-| Write a new SKILL.md from scratch | Sonnet |
-| High-stakes legal / billing / security judgment | Opus |
-
----
-
-## Key rules / constraints
-
-- **Always emit the routing card before execution.** Skipping it means human gates surface mid-task and stall work.
-- **RED gates trigger notify immediately.** Do not buffer them until the report.
-- **Escalate local → cloud only after 2 failed attempts.** Log: model used, prompt summary, why output was insufficient.
-- **Do not assign cloud model if local can do it.** Cost discipline is part of the routing decision.
-
----
-
-## Permissions
-
-| Type | Pattern | Why |
+| Field | Type | Required |
 |---|---|---|
-| Network | `http://localhost:11434` | Assign + dispatch sub-tasks to the local Ollama models |
-| MCP | `mcp__aws__*` | Check Secrets Manager presence when evaluating RED credential gates |
+| `task` | string | yes |
+
+## Output
+
+```json
+{
+  "red_gates": [],
+  "yellow_notes": [],
+  "estimated_cost": 0.0,
+  "recommended_skill": null
+}
+```
 
 ## Handoffs
 
-| Next step | Skill |
-|---|---|
-| Execute routing decision | `skills/operator/SKILL.md` |
-| Send red-gate alert | `skills/notify/SKILL.md` |
-| Call local Ollama model | `skills/local-runner/SKILL.md` |
-| Annotate plan steps with LOCAL/CLOUD routing | `skills/ollama-task-router/SKILL.md` |
+- `ollama-task-router` — local-vs-cloud per-step routing
+- `llm-selector` — pick the cloud model for cloud-routed steps
+- `memory-ladder` — persist routing card across sessions
 
-## Lambda / Step Functions candidates
+## Permissions
 
-| Function | Step | Stateless? | Lambda? |
-|---|---|---|---|
-| `parse_task` | Step 1 — extract deliverable, systems touched, output type from task string | yes | ✅ |
-| `split_subtasks` | Step 2 — decompose task into independent steps for model assignment | yes | ✅ |
-| `assign_model` | Step 2 — apply AI assignment rules table, return model per sub-task | yes | ✅ |
-| `check_gates` | Step 3 — evaluate each sub-task for RED/YELLOW gate conditions | yes | ✅ |
-| `emit_routing_card` | Step 4 — format and return the routing card block | yes | ✅ |
-| `notify_red_gate` | Step 4 — call notify.red_gate() for each blocking gate (HTTP to Telegram API) | yes | ✅ |
+None (pure-Python heuristic).
 
-All steps are stateless and deterministic from fixed rule tables — strong Lambda candidates. The full task-router pipeline fits in a single Lambda invocation: receive task → parse → split → assign models → check gates → emit card + notify. No Step Functions needed unless gate resolution requires waiting for human response (Step Functions WaitForTaskToken pattern).
+## Lambda candidates
 
-## Input / Output spec
+`evaluate()` — stateless, deterministic.
 
-**Input:**
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `task` | string | yes | Plain-language description of what needs to be done |
-| `systems` | string[] | no | Known systems the task touches (API, DB, external service); inferred if omitted |
-| `context` | object | no | Active session state: current slug, open gates, recent model escalations |
+## Value
 
-**Output:**
-```json
-{
-  "status": "ok | blocked",
-  "routing_card": {
-    "task": "Implement entitlement gate on /api/word/save",
-    "ai_assignment": [
-      { "subtask": "Plan implementation steps", "model": "gemma4:e2b", "cost": "$0 local" },
-      { "subtask": "Write UserService.isEntitled()", "model": "qwen2.5-coder:7b", "cost": "$0 local" },
-      { "subtask": "Review PR before merge", "model": "Sonnet", "cost": "~$0.05 cloud" }
-    ],
-    "red_gates": [
-      { "subtask": "Entitlements step", "blocker": "REVENUECAT_KEY not in Secrets Manager", "action": "Add to Secrets Manager us-east-1" }
-    ],
-    "yellow_notes": [
-      "Assumption: existing User model has an id field"
-    ],
-    "estimated_cost": "~$0.05 cloud + $0 local"
-  }
-}
-
----
-
-## Data collection (art-train)
-
-```python
-import sys; sys.path.insert(0, r"<workspace>/...")
-from art_train_collector import log_pair, update_outcome
-
-event_id = log_pair("task-router/classify", task_description, json.dumps({"model": model, "gate_type": gate_type}), model="phi4-mini")
-
-# If downstream task succeeded without the gate firing:
-update_outcome("task-router/classify", event_id, "ok")
-
-# If the gate fired correctly (blocker was real):
-update_outcome("task-router/classify", event_id, "confirmed")
-```
-
-**Training target:** Feeds `task-router-local` — reduces false red gates over time.
-
----
-
-## Step 0 — ollama-task-router delegation (mandatory before plan execution)
-
-**Before executing any multi-step plan or skill sequence**, call `ollama-task-router` with the full task step list. Display the routing table to the user before starting work.
-
-```
-Step 0 output (always show this):
-
-ROUTING TABLE — [task name]
-Step                          Route         Model              Est. cost
-─────────────────────────────────────────────────────────────────────────
-classify log severity         LOCAL         phi4-mini          $0
-draft PR reply                LOCAL         qwen2.5-coder:7b   $0
-evaluate architectural risk   CLOUD         Sonnet             ~$0.05
-generate storyboard stories   MAC-MINI      qwen2.5:32b        $0
-
-Total estimated cost: ~$0.05 (vs ~$0.35 if all-cloud)
-Savings: ~86%
-```
-
-Route labels:
-- `LOCAL` — Windows Ollama (localhost:11434)
-- `MAC-MINI` — Mac mini Ollama (<lan-host>:11434)  
-- `CLOUD` — Sonnet/Opus/Haiku via Anthropic API
-
-**Rule:** never default all steps to CLOUD without running this check first. Any step that is classify/route/format/extract can go LOCAL. Only genuine judgment + generation steps need CLOUD.
-
-Skill: `skills/ollama-task-router/SKILL.md`
+Catches missing credentials + irreversible actions BEFORE the agent burns tokens. Tests cover red-gate detection (API key keywords) + yellow-note flagging (TODO / ambiguous).

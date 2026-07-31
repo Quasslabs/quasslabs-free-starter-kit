@@ -22,26 +22,23 @@ Ask the user which they use if it's unclear. Prefer **project-local** install so
 
 ## 2. Inventory + propose (read-only first)
 
-1. List `skills/` in this repo (20 skills — see `README.md` for the map).
+1. List `skills/` in this repo (12 skills, flat — see `README.md` for the map).
 2. Look at the user's project: does it already have a `CLAUDE.md`? a `.claude/skills/` folder? any same-named skills?
 3. Propose a short integration plan and **wait for confirmation**:
-   - which skills to install (default: all 20; or just the foundation),
+   - which skills to install (default: all 12; or just the foundation),
    - target location,
    - any name collisions (never clobber — skip or rename, ask the user).
+   - Note: `gstack` currently assumes Claude Code's slash-command + hook infrastructure — flag this if the user is on Cursor/Codex.
 
 ## 3. Install
 
 - Copy the chosen `skills/<name>/` folders into the target skills location (project-local `.claude/skills/` recommended).
-- If the user has **no `CLAUDE.md`**: offer to run `skills/lifecycle/agent-setup-wizard/SKILL.md` — it generates a project `CLAUDE.md` + context files tuned to their stack. This is the highest-value first step.
+- If the user has **no `CLAUDE.md`**: offer to write a short one covering their stack + which of these skills apply and when — this kit doesn't ship a dedicated setup-wizard skill, so do this directly.
 - If the user **already has a `CLAUDE.md`**: do NOT rewrite it. Append a short section listing the newly available skills + when to use them (pull the one-liners from `README.md`). Keep their existing rules intact.
 
-## 4. Wire the session-start ritual (optional but recommended)
+## 4. Confirm it works
 
-Point the user at `skills/lifecycle/chat-primer/SKILL.md`: have it run at the start of new chats so the agent loads project context + surfaces the right skill for the task. If they use Claude Code, suggest adding a one-line "at session start, read chat-primer" note to their `CLAUDE.md`.
-
-## 5. Confirm it works
-
-- Pick one skill matched to a real task the user has right now (e.g. `repo-doc-builder` on a repo with no docs, or `task-router` before their next multi-step job) and demonstrate it end-to-end.
+- Pick one skill matched to a real task the user has right now (e.g. `task-router` before their next multi-step job, or `memory-ladder` if they're juggling several long-running chats on this project) and demonstrate it end-to-end.
 - Summarize what you installed, where, and what you changed in their `CLAUDE.md` (if anything).
 
 ---

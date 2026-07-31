@@ -1,0 +1,15 @@
+{
+  "name": "gstack",
+  "entry_point": null,
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "proprietary",
+    "tier": "free"
+  },
+  "slash_trigger": "/gstack"
+}

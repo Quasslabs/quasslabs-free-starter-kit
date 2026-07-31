@@ -6,9 +6,8 @@ Great work we can't bundle here — either because of its license or because it'
 | Repo | Why it's great |
 |---|---|
 | ★ [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) + [rtk-ai/rtk](https://github.com/rtk-ai/rtk) | The token-efficiency idea our `ug-ug` builds on. |
-| ★ [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) | The `tdd`, `zoom-out`, and `improve-codebase-architecture` lineage — excellent dev-agent skills. |
-| ★ [garrytan/gstack](https://github.com/garrytan/gstack) | The GStack full-stack workflow our `gstack` skill builds on — great starting point for developers. |
-| ★ [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) | The de-AI-ify-your-writing idea behind `humanizer`. |
+| ★ [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) | Excellent dev-agent skills — our `skill-builder` learned from this format. |
+| ★ [garrytan/gstack](https://github.com/garrytan/gstack) | The GStack role/pipeline workflow our `gstack` skill adapts — great starting point for developers. |
 
 ## Bigger agent frameworks (when you outgrow a skills folder)
 | Repo | Why it's great |
@@ -21,10 +20,9 @@ Great work we can't bundle here — either because of its license or because it'
 The repos our skills learned from — great if you're assembling your own agent toolkit:
 | Repo | Why |
 |---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) | High-quality dev-agent skills (where our tdd/zoom-out/architecture skills came from). |
+| [mattpocock/skills](https://github.com/mattpocock/skills) (MIT) | High-quality dev-agent skills — good reference for skill format. |
 | [travisvn/awesome-claude-skills](https://github.com/travisvn/awesome-claude-skills) + [ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) | Curated skill indexes — grep before building anything new. |
 | [yusufkaraaslan/Skill_Seekers](https://github.com/yusufkaraaslan/Skill_Seekers) + [virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) (MIT) | Auto-draft skills from docs / repos / PDFs. |
-| [google-labs-code/design.md](https://github.com/google-labs-code/design.md) (Apache-2.0) | A DESIGN.md spec agents read for architectural intent (pairs with a CLAUDE.md). |
 | [AlexsJones/llmfit](https://github.com/AlexsJones/llmfit) (MIT) | Hardware-aware "which models fit my GPU" — pairs with our `llm-selector`. |
 | [NirDiamant/Agent_Memory_Techniques](https://github.com/NirDiamant/Agent_Memory_Techniques) (MIT) + [OthmanAdi/planning-with-files](https://github.com/OthmanAdi/planning-with-files) (MIT) | Memory + persistent-planning patterns (behind our `memory-ladder`). |
 

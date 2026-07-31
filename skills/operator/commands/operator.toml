@@ -1,0 +1,15 @@
+description = "Route a task description to the right skill slug from the kit allowlist."
+prompt = """
+Route this task:
+{{args}}
+
+Match the task against the kit allowlist:
+- ug-ug: compress, terse, shorter, caveman
+- skill-builder: draft, scaffold, new skill
+- skill-linter: lint, validate, check SKILL.md
+- operator: route, orchestrate
+
+Return: {skill, reason}. If no match, return {skill: null, reason: ...}.
+
+Skill: skills/operator/SKILL.md
+"""

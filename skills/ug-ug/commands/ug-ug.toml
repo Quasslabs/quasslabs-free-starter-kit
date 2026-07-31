@@ -1,0 +1,16 @@
+description = "Switch to terse, token-efficient output. Pass a level: lite | medium | full | extra-ug | maximum-ug | none."
+prompt = """
+Apply ug-ug mode at level: {{args | default: "full"}}.
+
+Rules:
+- `lite`: trim openers + filler.
+- `medium`: bullets + symbols in plans and reasoning.
+- `full`: max internal compression; chat replies stay normal prose.
+- `extra-ug`: compress chat replies too; client deliverables stay normal.
+- `maximum-ug`: compress everything.
+
+Banned openers (never use in plans/reasoning/handovers):
+- "Let me...", "I'll go ahead and...", "I need to...", "Certainly!", "Sure!", "Great!", "Of course!", "I'll now...", "Also need to...", "In order to...", "This will...", "Let me explain..."
+
+Skill: skills/ug-ug/SKILL.md
+"""

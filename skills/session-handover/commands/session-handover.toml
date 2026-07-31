@@ -1,0 +1,21 @@
+description = "Generate a structured HANDOVER.md + session opener for the next session."
+prompt = """
+Write a session handover for: {{args | default: "current session"}}.
+
+Capture:
+- Completed this session (bulleted)
+- Current state (what was in progress)
+- Open items (prioritized)
+- Key decisions (with reasoning)
+- Files modified (with one-line change summary)
+- Next action (specific, immediately executable)
+
+Then emit a 3-5 sentence session opener paragraph to chat so the user can paste it at the start of the next session.
+
+Rules:
+- Next action must be specific and executable, not "continue where we left off".
+- Note uncommitted work in open items.
+- Capture WHY for decisions, not just what was decided.
+
+Skill: skills/session-handover/SKILL.md
+"""

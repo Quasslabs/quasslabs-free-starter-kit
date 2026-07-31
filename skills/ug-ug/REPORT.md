@@ -1,39 +1,26 @@
-# REPORT: ug-ug
-
-**Skill:** `wip/ug-ug`
-**Kit:** `caveman-skill` · **Tier:** `free`
-**Last measured:** 2026-05-29
-
+---
+license_id: <<LICENSE_ID>>
+skill: ug-ug
+kit: quasslabs-free-kit
+licensee: <<LICENSEE>>
+issued: <<ISSUED_AT>>
+license: MIT
+tier: free
 ---
 
-## Value at a glance
-| Metric               | Without skill | With skill  | How measured                                                                 |
-|----------------------|---------------|-------------|------------------------------------------------------------------------------|
-| Token usage          | ~13,000 tokens | ~4,500 tokens | Measured by running the same command with and without the `ug-ug` skill.      |
-| Response length      | Long          | Short       | Subjectively assessed based on human readability of responses.               |
-| Comprehensibility    | High          | Medium-high | Evaluated through user feedback and automated NLP tools.                    |
+# Skill Report — ug-ug
 
-## Who gets the most value
-Developers and operators who need to quickly review infrastructure risk, draft concise operator-facing recommendations, or classify ambiguous CLI output without sacrificing clarity.
+## License
 
-## How it fits in a flow
-Upstream: `rtk-ai/rtk` (CLI proxy for reducing LLM token consumption) -> **This skill** (`ug-ug`) -> `caveman` (client-facing documentation generator).
+MIT. `license_id` is a watermark; do not edit.
 
-The `ug-ug` skill is invoked after the infrastructure risk and rollout order have been reviewed, to draft operator-facing recommendations. It then feeds into the `caveman` skill for generating client-facing documentation.
+## ROI
 
-## Skill interactions
-| Pairs with | How                                                                 |
-|------------|----------------------------------------------------------------------|
-| `rtk-ai/rtk` | Reduces token usage in CLI commands, which is further compressed by `ug-ug`.                                    |
-| `caveman`   | Generates final client-facing documents from the concise recommendations produced by `ug-ug`.                    |
+Token reduction 10-25% at `full` on prose-heavy inputs. Defended in `evals/run.py` (>= 10% floor enforced).
 
-## Measured outcomes
-- **Token reduction**: 65% average reduction in token usage.
-- **Response quality**: User feedback indicates a 70% improvement in response clarity and readability.
+## Verification
 
-## Test coverage
-| Test                | Type        | Fixture                                         | Expected output                                                                 |
-|---------------------|-------------|------------------------------------------------|----------------------------------------------------------------------------------|
-| Token count test    | Integration | `ug-ug-commit` on `rtk-ai/rtk` commit logs      | Output should be ~4,500 tokens or less.                                          |
-| Response quality test| Manual     | Ambiguous CLI output from `rtk-ai/rtk`          | Output should be clear and concise, with no loss of critical information.        |
-| Workflow test       | End-to-end  | Full workflow from risk review to final doc gen | All steps should flow smoothly without errors or unexpected outputs.             |
+```bash
+pytest tests/test_ug_ug.py
+python evals/run.py
+```

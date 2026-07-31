@@ -1,0 +1,15 @@
+{
+  "name": "skill-builder",
+  "entry_point": "src/skill_builder.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/skill-builder"
+}

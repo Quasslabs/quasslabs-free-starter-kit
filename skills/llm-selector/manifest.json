@@ -1,0 +1,15 @@
+{
+  "name": "llm-selector",
+  "entry_point": "src/llm_selector.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/llm-selector"
+}

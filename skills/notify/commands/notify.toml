@@ -1,0 +1,16 @@
+description = "Send a notification to the human via Telegram. Pass a level: red_gate | report | checkpoint."
+prompt = """
+Send a notification at level: {{args | default: "report"}}.
+
+Levels:
+- `red_gate`: immediate blocker; agent cannot proceed without human action.
+- `report`: digest or session summary; informational.
+- `checkpoint`: yellow gate; decision required before continuing.
+
+Rules:
+- One message per red_gate. Never bundle multiple blockers.
+- Never include secret VALUES; reference key NAMES only.
+- On send failure, append to logs/notify-failed.log — never silently drop.
+
+Skill: skills/notify/SKILL.md
+"""

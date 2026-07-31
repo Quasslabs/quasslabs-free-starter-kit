@@ -1,0 +1,15 @@
+{
+  "name": "memory-ladder",
+  "entry_point": "src/memory_ladder.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/memory-ladder"
+}

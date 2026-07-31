@@ -18,7 +18,7 @@ None.
 ## How to run
 
 ```
-Invoke skill: skills/gstack/SKILL.md
+Invoke skill: G:\AI\skills\wip\gstack\SKILL.md
 ```
 Say "gstack" + role name (CEO / architect / QA / designer / security) or "full pipeline".
 

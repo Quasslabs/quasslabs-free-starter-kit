@@ -1,0 +1,15 @@
+{
+  "name": "skill-linter",
+  "entry_point": "src/skill_linter.py",
+  "uses": [],
+  "dependencies": {
+    "python": [],
+    "ollama_models": [],
+    "vault_entries": []
+  },
+  "commercial": {
+    "license": "MIT",
+    "tier": "free"
+  },
+  "slash_trigger": "/skill-linter"
+}
