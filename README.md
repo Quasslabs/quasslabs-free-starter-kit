@@ -74,9 +74,9 @@ These skills stand on other people's shoulders where noted. Upstream origins are
 
 ---
 
-## Paid packages (coming soon)
+## Paid packages
 
-This free kit is the foundation. The specialized, productized packs + done-for-you setup are listed in [`PAID-PACKAGES.md`](PAID-PACKAGES.md) — Pro Developer Toolkit, QA & Dev Pack, Designer Toolkit, Web Design Kit, Author Publishing Kit, Integrations Kit, OSINT Investigator, GTM Strategist, App Launch Pro, and a "set up your agent toolkit for you" engagement. Coming to Gumroad.
+This free kit is the foundation. [Freelancer Finance](https://quassian.gumroad.com/l/freelancer-finance) and [Web Design Kit](https://quassian.gumroad.com/l/web-design-kit) are live now; more specialized packs + a "set up your agent toolkit for you" engagement are listed in [`PAID-PACKAGES.md`](PAID-PACKAGES.md).
 
 ## License
 

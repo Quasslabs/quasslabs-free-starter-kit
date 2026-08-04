@@ -46,4 +46,4 @@ MIT — use commercially, modify freely. See `LICENSE.md` and `CREDITS.md`.
 
 ---
 
-*The paid packs (Pro Developer Toolkit, QA & Dev Pack, Designer Toolkit, and more) are coming soon — see `PAID-PACKAGES.md`. This free kit is the foundation.*
+*Freelancer Finance and Web Design Kit are live now, with more packs on the way — see `PAID-PACKAGES.md`. This free kit is the foundation.*
