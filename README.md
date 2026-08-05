@@ -12,6 +12,8 @@ Built by [QuassLabs](https://quasslabs.com) (Taylor Quass). If these help, the d
 
 A skill is a small markdown file (`SKILL.md`) that tells an AI agent *how* to do one job well — the steps, the gotchas, the handoffs to other skills. Drop them in your agent's skills folder and it stops guessing.
 
+That said, these skills come with more.
+
 Each skill in this kit ships with:
 - `SKILL.md` — what the skill does and how to invoke it
 - `FUNCTIONS.md` — pure functions (deterministic/Lambda-ready), AI-assisted steps, external services
@@ -80,4 +82,4 @@ This free kit is the foundation. [Freelancer Finance](https://quassian.gumroad.c
 
 ## License
 
-**MIT** — use it freely, including commercially. Licensed permissively to maximize adoption. See [`LICENSE.md`](LICENSE.md). The `gstack` skill retains upstream attribution (see CREDITS). If it helps, the specialized packs + done-for-you setup are how we keep the lights on.
+**MIT** — use it freely, including commercially. See [`LICENSE.md`](LICENSE.md). The `gstack` skill retains upstream attribution (see CREDITS). If it helps, the specialized packs + done-for-you setup are how we keep the lights on.
