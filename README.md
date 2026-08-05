@@ -14,7 +14,7 @@ A skill is a small markdown file (`SKILL.md`) that tells an AI agent *how* to do
 
 That said, these skills come with more.
 
-Each skill in this kit ships with:
+Each skill in this kit ships with multiple of the following:
 - `SKILL.md` — what the skill does and how to invoke it
 - `FUNCTIONS.md` — pure functions (deterministic/Lambda-ready), AI-assisted steps, external services
 - `SETUP.md` — deps, credentials, how to run, how to verify it works
